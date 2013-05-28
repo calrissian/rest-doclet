@@ -1,0 +1,150 @@
+package restdoclet.writer;
+
+import org.apache.commons.io.IOUtils;
+import restdoclet.Configuration;
+import restdoclet.model.ClassDescriptor;
+import restdoclet.model.EndpointDescriptor;
+import restdoclet.model.PathVariableDescriptor;
+import restdoclet.model.QueryParamDescriptor;
+
+import java.io.*;
+import java.util.Collection;
+
+import static restdoclet.util.CommonUtils.closeQuietly;
+
+public class SimpleHtmlWriter implements Writer{
+
+    private static final String DEFAULT_STYLESHEET = "default-stylesheet.css";
+
+    @Override
+    public void write(Collection<ClassDescriptor> classDescriptors, Configuration config) {
+
+        if (config.isdefaultStyleSheet())
+            generateStyleSheet(config);
+
+        writeHtml(classDescriptors, config);
+    }
+
+    private static void generateStyleSheet(Configuration config) {
+        InputStream in = null;
+        OutputStream out = null;
+        try {
+
+            in = Thread.currentThread().getContextClassLoader().getResourceAsStream(DEFAULT_STYLESHEET);
+            out = new FileOutputStream(new File(config.getStyleSheet()));
+
+            IOUtils.copy(in, out);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            closeQuietly(in);
+            closeQuietly(out);
+        }
+    }
+
+    private static void writeHtml(Collection<ClassDescriptor> classDescriptors, Configuration config) {
+
+        PrintWriter out = null;
+
+        try {
+            out = new PrintWriter(new File(config.getOutputFileName()));
+
+            out.println("<?xml version=\"1.0\" encoding=\"ISO-8859-1\" standalone=\"no\" ?>");
+            out.println("<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\"");
+            out.println("    \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\">");
+
+            out.println("<html xmlns=\"http://www.w3.org/1999/xhtml\">");
+
+            out.println("<head>");
+            out.println("<meta http-equiv=\"Content-Type\" content=\"text/html; charset=ISO-8859-1\" />");
+            out.println("<title>"+ config.getDocumentTitle() +"</title>");
+            out.println("<link rel='stylesheet' type='text/css' href=' " + config.getStyleSheet() + "'/>");
+            out.println("</head>");
+
+            out.println("<body>");
+
+            out.println("<div id=\"wrapper\">");
+            out.println("<div id=\"container\">");
+
+            out.println("<h1>"+ config.getDocumentTitle() +"</h1>");
+            out.println("<hr />");
+
+            for (ClassDescriptor classDescriptor : classDescriptors) {
+                out.println("<div id='" + classDescriptor.getName().replace(" ", "_") + "'>");
+                out.println("<h3>" + classDescriptor.getName() + "</h3>" );
+                out.print("<div class=\"bean_description\">" + classDescriptor.getDescription() + "</div>");
+
+                for (EndpointDescriptor endpoint: classDescriptor.getEndpoints()) {
+                    out.println("<table class=\"endpoint\">");
+                    out.println("<colgroup>");
+                    out.println("<col style=\"width: 10%;\" />");
+                    out.println("<col style=\"width: 90%;\" />");
+                    out.println("</colgroup>");
+                    out.println("<tr>");
+                    out.println("<th>Method</th>");
+                    out.println("<th>Path</th>");
+                    out.println("</tr>");
+                    out.println("<tr>");
+                    out.println("<td class=\"field_format\">" + endpoint.getHttpMethod() + "</td>");
+                    out.println("<td class=\"field_format\">" + endpoint.getPath() + "</td>");
+                    out.println("</tr>");
+                    out.println("<tr>");
+                    out.println("<th colspan=\"2\">REST Point Information</th>");
+                    out.println("</tr>");
+                    out.println("<tr>");
+                    out.println("<td colspan=\"2\">");
+
+                    if (!endpoint.getPathVars().isEmpty()) {
+
+                        out.println("<div class=\"info_title\">Path Variables</div>");
+                        out.println("<table width=\"100%\" class=\"list\">");
+                        for (PathVariableDescriptor pathVar : endpoint.getPathVars()) {
+                            out.println("<tr>");
+                            out.println("<td class=\"code_format\">" + pathVar.getName() + "</td>");
+                            out.println("<td class=\"descr_format\">" + pathVar.getDescription() + "</td>");
+                            out.println("</tr>");
+                        }
+                        out.println("</table>");
+                    }
+
+                    if (!endpoint.getQueryParams().isEmpty()) {
+
+                        out.println("<div class=\"info_title\">Query Parameters</div>");
+                        out.println("<table width=\"100%\" class=\"list\">");
+                        for (QueryParamDescriptor queryParam : endpoint.getQueryParams()) {
+                            out.println("<tr>");
+                            out.println("<td class=\"code_format\">" + queryParam.getName() + (queryParam.isRequired() ? " (required)" : "") + "</td>");
+                            out.println("<td class=\"descr_format\">" + queryParam.getDescription() + "</td>");
+                            out.println("</tr>");
+                        }
+                        out.println("</table>");
+                    }
+
+                    out.println("<div class=\"info_title\">Description</div>");
+                    out.println("<div class=\"info_text\">" + endpoint.getDescription() + "</div>");
+                    out.println("</td>");
+                    out.println("</tr>");
+                    out.println("</table>");
+
+                }
+
+                out.println("</div>");
+                out.println("<hr />");
+            }
+
+            out.println("</div>");
+            out.println("</div>");
+            out.println("</body>");
+            out.println("</html>");
+
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } finally {
+            closeQuietly(out);
+        }
+    }
+
+
+
+}

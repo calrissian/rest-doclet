@@ -1,0 +1,137 @@
+body {
+    background-color: #cccccc;
+    color: #3333333;
+    font-size: 0.75em;
+    font-family: sans-serif;
+    margin: 0px;
+}
+
+#wrapper {
+    background-color: #eeeeee;
+    border-left: 2px solid #aaaaaa;
+    border-top: 2px solid #aaaaaa;
+    border-right: 2px solid #888888;
+    border-bottom: 2px solid #888888;
+    width: 900px;
+    margin: 20px auto;
+    padding: 10px;
+}
+
+#container {
+    margin: 0px;
+    padding: 0px;
+}
+
+table {
+    border-collapse: collapse;
+}
+
+table, td, th {
+    border: 0px;
+}
+
+table.endpoint {
+    border: 1px solid #002200;
+    margin-bottom: 15px;
+}
+
+table.endpoint td, table.endpoint th {
+    padding: 3px 6px;
+    text-align: left;
+}
+
+table.endpoint th {
+   color: #ffffff;
+   font-weight: bold;
+   font-size: 1.2em;
+   background-color: #83aa59;
+   border: 1px solid #002200;
+}
+
+table.endpoint td {
+    border: 1px solid #002200;
+}
+
+table.endpoint td.field_format {
+   font-family: monospace;
+   font-weight: bold;
+   font-size: 1.5em;
+   background-color: #dddddd;
+   vertical-align: top;
+}
+
+
+table.list, table.list td {
+    border: 1px solid #002200;
+    margin-bottom: 10px;
+}
+
+div.classification {
+    font-style: italic;
+    font-weight: bold;
+    font-size: 1.1em;
+    color: #444444;
+}
+
+div.bean_description {
+    margin-bottom: 10px;
+}
+
+div.info_title {
+    font-weight: bold;
+    font-size: 1.2em;
+    margin-bottom: 5px;
+}
+
+div.description {
+    margin-bottom: 5px;
+}
+
+a {
+    color: #003300;
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+h1 {
+    color: #007c00;
+    font-weight: normal;
+    font-size: 3em;
+    text-align: center;
+}
+
+h2 {
+    color: #007c00;
+    font-weight: normal;
+    font-size: 2em;
+}
+
+h3 {
+    color: #007c00;
+    font-weight: normal;
+    font-size: 1.5em;
+}
+
+td.code_format{
+    font-family: monospace;
+    font-weight: bold;
+    font-style: italic;
+    font-size: 1.1em;
+    background-color: #dddddd;
+}
+
+td.descr_format{
+    font-family: monospace;
+    font-size: 1.1em;
+}
+
+.code {
+    font-family: monospace;
+}
+
+pre{
+    font-family: monospace;
+}
