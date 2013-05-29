@@ -21,29 +21,37 @@ public class CollectorUtils {
     protected static String PATHVAR_ANNOTATION = "org.springframework.web.bind.annotation.PathVariable";
     protected static String PARAM_ANNOTATION = "org.springframework.web.bind.annotation.RequestParam";
 
-    protected static RequestMappingAnnotation getRequestMappingAnnotation(ProgramElementDoc doc) {
+    protected static EndpointMapping getEndpointMapping(ProgramElementDoc doc) {
 
         //Look for a request mapping annotation
         for (AnnotationDesc annotation : doc.annotations()) {
             //If found then extract the value (paths) and the methods.
             if (MAPPING_ANNOTATION.equals(getAnnotationName(annotation))) {
 
-                //Get paths from annotation
-                Collection<String> paths = new LinkedHashSet<String>(getElementValue(annotation, "value"));
-
                 //Get http methods from annotation
                 Collection<String> httpMethods = new LinkedHashSet<String>();
                 for (String value : getElementValue(annotation, "method"))
                     httpMethods.add(value.substring(value.lastIndexOf(".") + 1));
 
-                return new RequestMappingAnnotation(paths, httpMethods);
+                return new EndpointMapping(
+                        new LinkedHashSet<String>(getElementValue(annotation, "value")),
+                        httpMethods,
+                        new LinkedHashSet<String>(getElementValue(annotation, "consumes")),
+                        new LinkedHashSet<String>(getElementValue(annotation, "produces"))
+                );
             }
         }
 
-        return null;
+        //Simply return an empty grouping if no request mapping was found.
+        return new EndpointMapping(
+                Collections.<String>emptySet(),
+                Collections.<String>emptySet(),
+                Collections.<String>emptySet(),
+                Collections.<String>emptySet()
+        );
     }
 
-    protected static Set<String> generatePaths(String contextPath, RequestMappingAnnotation classMapping, RequestMappingAnnotation methodMapping) {
+    protected static Set<String> generatePaths(String contextPath, EndpointMapping classMapping, EndpointMapping methodMapping) {
 
         contextPath = (contextPath == null ? "" : contextPath);
 
@@ -71,15 +79,23 @@ public class CollectorUtils {
         return paths;
     }
 
-    protected static Collection<String> getHttpMethods(RequestMappingAnnotation classMapping, RequestMappingAnnotation methodMapping) {
+    private static <T> Collection<T> methodOverridesClassHelper(Collection<T> classValues, Collection<T> methodValues, Collection<T> defaultValues) {
+        if (!isEmpty(methodValues))
+            return methodValues;
 
-        //use methods from annotations.  If non specified use GET.
-        Collection<String> methods = methodMapping.getHttpMethods();
+        return (isEmpty(classValues) ? defaultValues : classValues);
+    }
 
-        if (isEmpty(methods))
-            methods = (isEmpty(classMapping.getHttpMethods()) ? asList("GET") : classMapping.getHttpMethods());
+    protected static Collection<String> getHttpMethods(EndpointMapping classMapping, EndpointMapping methodMapping) {
+        return methodOverridesClassHelper(classMapping.getHttpMethods(), methodMapping.getHttpMethods(), asList("GET"));
+    }
 
-        return methods;
+    protected static Collection<String> getConsumes(EndpointMapping classMapping, EndpointMapping methodMapping) {
+        return methodOverridesClassHelper(classMapping.getConsumes(), methodMapping.getConsumes(), Collections.<String>emptySet());
+    }
+
+    protected static Collection<String> getProduces(EndpointMapping classMapping, EndpointMapping methodMapping) {
+        return methodOverridesClassHelper(classMapping.getProduces(), methodMapping.getProduces(), Collections.<String>emptySet());
     }
 
     protected static Collection<PathVariableDescriptor> generatePathVars(MethodDoc methodDoc) {
@@ -146,20 +162,38 @@ public class CollectorUtils {
         return retVal;
     }
 
-    protected static class RequestMappingAnnotation{
+    protected static class EndpointMapping {
         private final Collection<String> paths;
         private final Collection<String> httpMethods;
+        private final Collection<String> consumes;
+        private final Collection<String> produces;
 
-        protected RequestMappingAnnotation(Collection<String> paths, Collection<String> httpMethods) {
+        public EndpointMapping(
+                Collection<String> paths,
+                Collection<String> httpMethods,
+                Collection<String> consumes,
+                Collection<String> produces) {
+
             this.paths = paths;
             this.httpMethods = httpMethods;
+            this.consumes = consumes;
+            this.produces = produces;
         }
 
-        protected Collection<String> getPaths() {
+        public Collection<String> getPaths() {
             return paths;
         }
 
-        protected Collection<String> getHttpMethods() {
+        public Collection<String> getHttpMethods() {
             return httpMethods;
         }
-    }}
+
+        public Collection<String> getConsumes() {
+            return consumes;
+        }
+
+        public Collection<String> getProduces() {
+            return produces;
+        }
+    }
+}

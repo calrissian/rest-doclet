@@ -35,10 +35,10 @@ public class SpringCollector extends AbstractCollector {
 
     @Override
     protected Collection<EndpointDescriptor> getEndpoints(String contextPath, ClassDoc classDoc, Configuration config) {
-        return getEndpoints(contextPath, classDoc, getRequestMappingAnnotation(classDoc));
+        return getEndpoints(contextPath, classDoc, getEndpointMapping(classDoc));
     }
 
-    protected Collection<EndpointDescriptor> getEndpoints(String contextPath, ClassDoc classDoc, RequestMappingAnnotation classMapping) {
+    protected Collection<EndpointDescriptor> getEndpoints(String contextPath, ClassDoc classDoc, EndpointMapping classMapping) {
         Collection<EndpointDescriptor> endpointDescriptors = new ArrayList<EndpointDescriptor>();
 
         for (MethodDoc method : classDoc.methods(true)) {
@@ -54,17 +54,19 @@ public class SpringCollector extends AbstractCollector {
         return endpointDescriptors;
     }
 
-    protected Collection<EndpointDescriptor> getSingleEndpoint(String contextPath, RequestMappingAnnotation classMappings, MethodDoc method) {
+    protected Collection<EndpointDescriptor> getSingleEndpoint(String contextPath, EndpointMapping classMappings, MethodDoc method) {
 
         //If the ignore tag is present then simply return nothing for this endpoint.
         if (!isEmpty(method.tags(IGNORE_TAG)))
             return Collections.emptyList();
 
         Collection<EndpointDescriptor> endpointDescriptors = new ArrayList<EndpointDescriptor>();
-        RequestMappingAnnotation methodMapping = getRequestMappingAnnotation(method);
+        EndpointMapping methodMapping = getEndpointMapping(method);
 
 
         Collection<String> paths = generatePaths(contextPath, classMappings, methodMapping);
+        Collection<String> consumes = getConsumes(classMappings, methodMapping);
+        Collection<String> produces = getProduces(classMappings, methodMapping);
         Collection<PathVariableDescriptor> pathVars = generatePathVars(method);
         Collection<QueryParamDescriptor> queryParams = generateQueryParams(method);
 
@@ -76,6 +78,8 @@ public class SpringCollector extends AbstractCollector {
                                 httpMethod,
                                 queryParams,
                                 pathVars,
+                                consumes,
+                                produces,
                                 method.commentText()
                         )
                 );

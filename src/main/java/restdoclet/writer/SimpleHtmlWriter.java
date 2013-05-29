@@ -11,6 +11,7 @@ import java.io.*;
 import java.util.Collection;
 
 import static restdoclet.util.CommonUtils.closeQuietly;
+import static restdoclet.util.CommonUtils.isEmpty;
 
 public class SimpleHtmlWriter implements Writer{
 
@@ -95,7 +96,7 @@ public class SimpleHtmlWriter implements Writer{
                     out.println("<tr>");
                     out.println("<td colspan=\"2\">");
 
-                    if (!endpoint.getPathVars().isEmpty()) {
+                    if (!isEmpty(endpoint.getPathVars())) {
 
                         out.println("<div class=\"info_title\">Path Variables</div>");
                         out.println("<table width=\"100%\" class=\"list\">");
@@ -108,7 +109,7 @@ public class SimpleHtmlWriter implements Writer{
                         out.println("</table>");
                     }
 
-                    if (!endpoint.getQueryParams().isEmpty()) {
+                    if (!isEmpty(endpoint.getQueryParams())) {
 
                         out.println("<div class=\"info_title\">Query Parameters</div>");
                         out.println("<table width=\"100%\" class=\"list\">");
@@ -116,6 +117,28 @@ public class SimpleHtmlWriter implements Writer{
                             out.println("<tr>");
                             out.println("<td class=\"code_format\">" + queryParam.getName() + (queryParam.isRequired() ? " (required)" : "") + "</td>");
                             out.println("<td class=\"descr_format\">" + queryParam.getDescription() + "</td>");
+                            out.println("</tr>");
+                        }
+                        out.println("</table>");
+                    }
+
+                    if (!isEmpty(endpoint.getConsumes())) {
+                        out.println("<div class=\"info_title\">Accepts</div>");
+                        out.println("<table width=\"100%\" class=\"list\">");
+                        for (String acceptType : endpoint.getConsumes()) {
+                            out.println("<tr>");
+                            out.println("<td class=\"code_format\">" + acceptType + "</td>");
+                            out.println("</tr>");
+                        }
+                        out.println("</table>");
+                    }
+
+                    if (!isEmpty(endpoint.getProduces())) {
+                        out.println("<div class=\"info_title\">Produces</div>");
+                        out.println("<table width=\"100%\" class=\"list\">");
+                        for (String outputType : endpoint.getProduces()) {
+                            out.println("<tr>");
+                            out.println("<td class=\"code_format\">" + outputType + "</td>");
                             out.println("</tr>");
                         }
                         out.println("</table>");

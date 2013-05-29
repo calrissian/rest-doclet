@@ -8,13 +8,25 @@ public class EndpointDescriptor {
     private final String httpMethod;
     private final Collection<QueryParamDescriptor> queryParams;
     private final Collection<PathVariableDescriptor> pathVars;
+    private final Collection<String> consumes;
+    private final Collection<String> produces;
     private final String description;
 
-    public EndpointDescriptor(String path, String httpMethod, Collection<QueryParamDescriptor> queryParams, Collection<PathVariableDescriptor> pathVars, String description) {
+    public EndpointDescriptor(
+            String path,
+            String httpMethod,
+            Collection<QueryParamDescriptor> queryParams,
+            Collection<PathVariableDescriptor> pathVars,
+            Collection<String> consumes,
+            Collection<String> produces,
+            String description) {
+
         this.path = path;
         this.httpMethod = httpMethod;
         this.queryParams = queryParams;
         this.pathVars = pathVars;
+        this.consumes = consumes;
+        this.produces = produces;
         this.description = description;
     }
 
@@ -34,6 +46,14 @@ public class EndpointDescriptor {
         return pathVars;
     }
 
+    public Collection<String> getConsumes() {
+        return consumes;
+    }
+
+    public Collection<String> getProduces() {
+        return produces;
+    }
+
     public String getDescription() {
         return description;
     }
@@ -45,6 +65,8 @@ public class EndpointDescriptor {
                 ", httpMethod='" + httpMethod + '\'' +
                 ", queryParams=" + queryParams +
                 ", pathVars=" + pathVars +
+                ", consumes=" + consumes +
+                ", produces=" + produces +
                 ", description='" + description + '\'' +
                 '}';
     }

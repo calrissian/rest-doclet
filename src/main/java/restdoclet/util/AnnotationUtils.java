@@ -5,7 +5,10 @@ import com.sun.javadoc.AnnotationDesc;
 import com.sun.javadoc.AnnotationValue;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+
+import static java.util.Collections.emptyList;
 
 public class AnnotationUtils {
 
@@ -24,7 +27,7 @@ public class AnnotationUtils {
                 return resolveAnnotationValue(element.value());
             }
 
-        return new ArrayList<String>();
+        return emptyList();
     }
 
     private static List<String> resolveAnnotationValue(AnnotationValue value) {
