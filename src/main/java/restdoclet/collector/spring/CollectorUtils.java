@@ -8,8 +8,8 @@ import java.util.*;
 
 import static java.lang.Boolean.TRUE;
 import static java.util.Arrays.asList;
-import static restdoclet.util.AnnotationUtil.getAnnotationName;
-import static restdoclet.util.AnnotationUtil.getElementValue;
+import static restdoclet.util.AnnotationUtils.getAnnotationName;
+import static restdoclet.util.AnnotationUtils.getElementValue;
 import static restdoclet.util.CommonUtils.isEmpty;
 import static restdoclet.util.TagUtils.*;
 
@@ -73,7 +73,7 @@ public class CollectorUtils {
 
     protected static Collection<String> getHttpMethods(RequestMappingAnnotation classMapping, RequestMappingAnnotation methodMapping) {
 
-        //use methods from annotations.  If non specified used the defaults.  Again if non specified it is a GET.
+        //use methods from annotations.  If non specified use GET.
         Collection<String> methods = methodMapping.getHttpMethods();
 
         if (isEmpty(methods))
@@ -127,10 +127,10 @@ public class CollectorUtils {
 
                     List<String> requiredVals = getElementValue(annotation, "required");
 
+                    //With spring query params are required by default
                     boolean required = TRUE;
                     if(!requiredVals.isEmpty())
                         required = Boolean.parseBoolean(requiredVals.get(0));
-
 
                     //first check for special tag, then check regular param tag, finally default to empty string
                     String text = findParamText(tags, name);

@@ -15,7 +15,7 @@ import java.util.Collection;
 import java.util.Collections;
 
 import static restdoclet.collector.spring.CollectorUtils.*;
-import static restdoclet.util.AnnotationUtil.getAnnotationName;
+import static restdoclet.util.AnnotationUtils.getAnnotationName;
 import static restdoclet.util.CommonUtils.isEmpty;
 import static restdoclet.util.TagUtils.IGNORE_TAG;
 
@@ -54,13 +54,6 @@ public class SpringCollector extends AbstractCollector {
         return endpointDescriptors;
     }
 
-    /**
-     * This will return the set of endpoints that this particular method can point to.
-     * @param contextPath
-     * @param classMappings
-     * @param method
-     * @return
-     */
     protected Collection<EndpointDescriptor> getSingleEndpoint(String contextPath, RequestMappingAnnotation classMappings, MethodDoc method) {
 
         //If the ignore tag is present then simply return nothing for this endpoint.
@@ -89,14 +82,4 @@ public class SpringCollector extends AbstractCollector {
 
         return endpointDescriptors;
     }
-
-
-
-
-
-
-
-
-
-
 }

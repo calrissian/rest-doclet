@@ -7,7 +7,7 @@ import com.sun.javadoc.AnnotationValue;
 import java.util.ArrayList;
 import java.util.List;
 
-public class AnnotationUtil {
+public class AnnotationUtils {
 
     public static String getAnnotationName(AnnotationDesc annotation) {
         try{
@@ -17,7 +17,6 @@ public class AnnotationUtil {
             return null;
         }
     }
-
 
     public static List<String> getElementValue(AnnotationDesc annotation, String key) {
         for (AnnotationDesc.ElementValuePair element : annotation.elementValues())

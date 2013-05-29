@@ -66,13 +66,6 @@ table.list, table.list td {
     margin-bottom: 10px;
 }
 
-div.classification {
-    font-style: italic;
-    font-weight: bold;
-    font-size: 1.1em;
-    color: #444444;
-}
-
 div.bean_description {
     margin-bottom: 10px;
 }
