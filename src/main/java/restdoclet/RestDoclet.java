@@ -3,15 +3,24 @@ package restdoclet;
 
 import com.sun.javadoc.Doclet;
 import com.sun.javadoc.RootDoc;
+import restdoclet.collector.Collector;
 import restdoclet.collector.jaxrs.JaxRSCollector;
 import restdoclet.collector.spring.SpringCollector;
 import restdoclet.model.ClassDescriptor;
 import restdoclet.writer.SimpleHtmlWriter;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 
+import static restdoclet.Configuration.getOptionLength;
+
 public class RestDoclet extends Doclet {
+
+    private static final Collection<Collector> collectors = Arrays.<Collector>asList(
+            new SpringCollector(),
+            new JaxRSCollector()
+    );
 
     /**
      * Generate documentation here.
@@ -24,8 +33,9 @@ public class RestDoclet extends Doclet {
         Configuration config = new Configuration(root.options());
 
         Collection<ClassDescriptor> classDescriptors = new ArrayList<ClassDescriptor>();
-        classDescriptors.addAll(new SpringCollector().getDescriptors(root, config));
-        classDescriptors.addAll(new JaxRSCollector().getDescriptors(root, config));
+
+        for (Collector collector : collectors)
+            classDescriptors.addAll(collector.getDescriptors(root));
 
         new SimpleHtmlWriter().write(classDescriptors, config);
 
@@ -38,7 +48,7 @@ public class RestDoclet extends Doclet {
      * @return option length
      */
     public static int optionLength(String option) {
-        return Configuration.getOptionLength(option);
+        return getOptionLength(option);
     }
 
 }

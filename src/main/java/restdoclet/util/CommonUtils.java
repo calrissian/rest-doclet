@@ -2,8 +2,9 @@ package restdoclet.util;
 
 import java.io.Closeable;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.Collection;
-import java.util.Collections;
 
 import static java.util.Collections.emptySet;
 
@@ -37,5 +38,14 @@ public class CommonUtils {
                 return collection;
 
         return emptySet();
+    }
+
+    public static <T> void copy(InputStream input, OutputStream output) throws IOException {
+        byte[] buffer = new byte[1024 * 4];
+        int len;
+
+        while ((len = input.read(buffer)) > 0 ) {
+            output.write(buffer, 0, len);
+        }
     }
 }

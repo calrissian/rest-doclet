@@ -1,6 +1,5 @@
 package restdoclet.writer;
 
-import org.apache.commons.io.IOUtils;
 import restdoclet.Configuration;
 import restdoclet.model.ClassDescriptor;
 import restdoclet.model.EndpointDescriptor;
@@ -10,8 +9,7 @@ import restdoclet.model.QueryParamDescriptor;
 import java.io.*;
 import java.util.Collection;
 
-import static restdoclet.util.CommonUtils.closeQuietly;
-import static restdoclet.util.CommonUtils.isEmpty;
+import static restdoclet.util.CommonUtils.*;
 
 public class SimpleHtmlWriter implements Writer{
 
@@ -34,7 +32,7 @@ public class SimpleHtmlWriter implements Writer{
             in = Thread.currentThread().getContextClassLoader().getResourceAsStream(DEFAULT_STYLESHEET);
             out = new FileOutputStream(new File(config.getStyleSheet()));
 
-            IOUtils.copy(in, out);
+            copy(in, out);
 
         } catch (Exception e) {
             e.printStackTrace();

@@ -43,16 +43,20 @@ public class Configuration {
     }
 
     public boolean isdefaultStyleSheet() {
-        return getStyleSheet().equals(ConfigOption.STYLESHEET.getDefaultValue());
+        return getOption(ConfigOption.STYLESHEET.getOption(), null) == null;
     }
 
     private String getOption(ConfigOption configOption) {
+        return getOption(configOption.getOption(), configOption.getDefaultValue());
+    }
+
+    private String getOption(String name, String defaultValue) {
         for (String[] option : options) {
-            if (option[0].equals(configOption.getOption())) {
+            if (option[0].equals(name)) {
                 return option[1];
             }
         }
-        return configOption.getDefaultValue();
+        return defaultValue;
     }
 
     public static int getOptionLength(String option) {

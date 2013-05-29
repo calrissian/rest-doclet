@@ -1,29 +1,40 @@
 package restdoclet.collector.jaxrs;
 
-import com.sun.javadoc.AnnotationDesc;
-import com.sun.javadoc.ClassDoc;
-import com.sun.javadoc.MethodDoc;
-import restdoclet.Configuration;
+import com.sun.javadoc.*;
 import restdoclet.collector.AbstractCollector;
 import restdoclet.collector.EndpointMapping;
-import restdoclet.model.EndpointDescriptor;
 import restdoclet.model.PathVariableDescriptor;
 import restdoclet.model.QueryParamDescriptor;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
+import java.util.LinkedHashSet;
+import java.util.List;
 
-import static java.util.Arrays.asList;
-import static restdoclet.collector.jaxrs.JaxRSCollectorUtils.*;
 import static restdoclet.util.AnnotationUtils.getAnnotationName;
-import static restdoclet.util.CommonUtils.firstNonEmpty;
-import static restdoclet.util.CommonUtils.isEmpty;
-import static restdoclet.util.TagUtils.IGNORE_TAG;
+import static restdoclet.util.AnnotationUtils.getElementValue;
+import static restdoclet.util.TagUtils.*;
 
-public class JaxRSCollector extends AbstractCollector{
+public class JaxRSCollector extends AbstractCollector {
+
+    protected static final String ANNOTATION_PACKAGE = "javax.ws.rs.";
+
+    protected static final String PATH_ANNOTATION = ANNOTATION_PACKAGE + "Path";
+
+    protected static final String GET_ANNOTATION = ANNOTATION_PACKAGE + "GET";
+    protected static final String POST_ANNOTATION = ANNOTATION_PACKAGE + "POST";
+    protected static final String PUT_ANNOTATION = ANNOTATION_PACKAGE + "PUT";
+    protected static final String DELETE_ANNOTATION = ANNOTATION_PACKAGE + "DELETE";
+    protected static final String HEAD_ANNOTATION = ANNOTATION_PACKAGE + "HEAD";
+
+    protected static final String CONSUMES_ANNOTATION = ANNOTATION_PACKAGE + "Consumes";
+    protected static final String PRODUCES_ANNOTATION = ANNOTATION_PACKAGE + "Produces";
+
+    protected static final String PATHVAR_ANNOTATION = ANNOTATION_PACKAGE + "PathParam";
+    protected static final String PARAM_ANNOTATION = ANNOTATION_PACKAGE + "QueryParam";
+
     @Override
-    protected boolean shouldIgnoreClass(ClassDoc classDoc, Configuration config) {
+    protected boolean shouldIgnoreClass(ClassDoc classDoc) {
 
         //Look for any JAXRS annotations in the class or the methods.  If found then don't ignore this class.
         for (AnnotationDesc classAnnotation : classDoc.annotations()) {
@@ -34,66 +45,129 @@ public class JaxRSCollector extends AbstractCollector{
         }
 
         for (MethodDoc methodDoc : classDoc.methods(true)) {
-            for (AnnotationDesc methodAnnotation : methodDoc.annotations()) {
-                String annotationName = getAnnotationName(methodAnnotation);
-                if (annotationName != null && annotationName.startsWith(ANNOTATION_PACKAGE))
-                    return false;
-
-            }
+            if (!shouldIgnoreMethod(methodDoc))
+                return false;
         }
 
         return true;
     }
 
     @Override
-    protected Collection<EndpointDescriptor> getEndpoints(String contextPath, ClassDoc classDoc, Configuration config) {
-        return getEndpoints(contextPath, classDoc, getEndpointMapping(classDoc));
+    protected boolean shouldIgnoreMethod(MethodDoc methodDoc) {
+
+        //Jax RS methods need a method annotation inorder to be used, so simply look for them.
+        for (AnnotationDesc methodAnnotation : methodDoc.annotations()) {
+            String annotationName = getAnnotationName(methodAnnotation);
+            if (GET_ANNOTATION.equals(annotationName) ||
+                    POST_ANNOTATION.equals(annotationName) ||
+                    PUT_ANNOTATION.equals(annotationName) ||
+                    DELETE_ANNOTATION.equals(annotationName) ||
+                    HEAD_ANNOTATION.equals(annotationName)) {
+                return false;
+            }
+        }
+        return true;
     }
 
-    protected Collection<EndpointDescriptor> getEndpoints(String contextPath, ClassDoc classDoc, EndpointMapping classMapping) {
-        Collection<EndpointDescriptor> endpointDescriptors = new ArrayList<EndpointDescriptor>();
+    @Override
+    protected EndpointMapping getEndpointMapping(ProgramElementDoc doc) {
+        Collection<String> paths = new LinkedHashSet<String>();
+        Collection<String> httpMethods = new LinkedHashSet<String>();
+        Collection<String> consumes = new LinkedHashSet<String>();
+        Collection<String> produces = new LinkedHashSet<String>();
 
-        for (MethodDoc method : classDoc.methods(true))
-            endpointDescriptors.addAll(getSingleEndpoint(contextPath, classMapping, method));
+        //Look for a request mapping annotation
+        for (AnnotationDesc annotation : doc.annotations()) {
 
+            String annotationName = getAnnotationName(annotation);
 
-        //Check super classes for inherited request mappings
-        if (classDoc.superclass() != null)
-            endpointDescriptors.addAll(getEndpoints(contextPath, classDoc.superclass(), classMapping));
+            if (GET_ANNOTATION.equals(annotationName) ||
+                    POST_ANNOTATION.equals(annotationName) ||
+                    PUT_ANNOTATION.equals(annotationName) ||
+                    DELETE_ANNOTATION.equals(annotationName) ||
+                    HEAD_ANNOTATION.equals(annotationName)) {
 
-        return endpointDescriptors;
+                httpMethods.add(annotationName.replace(ANNOTATION_PACKAGE, ""));
+
+            } else if (PATH_ANNOTATION.equals(annotationName)) {
+                paths.addAll(getElementValue(annotation, "value"));
+            } else if (CONSUMES_ANNOTATION.equals(annotationName)) {
+                consumes.addAll(getElementValue(annotation, "value"));
+            } else if (PRODUCES_ANNOTATION.equals(annotationName)) {
+                produces.addAll(getElementValue(annotation, "value"));
+            }
+        }
+
+        return new EndpointMapping(
+                paths,
+                httpMethods,
+                consumes,
+                produces
+        );
     }
 
-    protected Collection<EndpointDescriptor> getSingleEndpoint(String contextPath, EndpointMapping classMapping, MethodDoc method) {
+    @Override
+    protected Collection<PathVariableDescriptor> generatePathVars(MethodDoc methodDoc) {
+        Collection<PathVariableDescriptor> retVal = new ArrayList<PathVariableDescriptor>();
 
-        //If the ignore tag is present then simply return nothing for this endpoint.
-        if (!isEmpty(method.tags(IGNORE_TAG)))
-            return Collections.emptyList();
+        Tag[] tags = methodDoc.tags(PATHVAR_TAG);
+        ParamTag[] paramTags = methodDoc.paramTags();
 
-        Collection<EndpointDescriptor> endpointDescriptors = new ArrayList<EndpointDescriptor>();
-        EndpointMapping methodMapping = getEndpointMapping(method);
+        for (Parameter parameter : methodDoc.parameters()) {
+            for (AnnotationDesc annotation : parameter.annotations()) {
+                if (getAnnotationName(annotation).equals(PATHVAR_ANNOTATION)) {
+                    String name = parameter.name();
+                    List<String> values = getElementValue(annotation, "value");
+                    if (!values.isEmpty())
+                        name = values.get(0);
 
-        Collection<String> paths = generatePaths(contextPath, classMapping, methodMapping);
-        Collection<String> httpMethods = methodMapping.getHttpMethods();
-        Collection<String> consumes = firstNonEmpty(methodMapping.getConsumes(), classMapping.getConsumes());
-        Collection<String> produces = firstNonEmpty(methodMapping.getProduces(), classMapping.getProduces());
-        Collection<PathVariableDescriptor> pathVars = generatePathVars(method);
-        Collection<QueryParamDescriptor> queryParams = generateQueryParams(method);
+                    //first check for special tag, then check regular param tag, finally default to empty string
+                    String text = findParamText(tags, name);
+                    if (text == null)
+                        text = findParamText(paramTags, parameter.name());
+                    if (text == null)
+                        text = "";
 
-        for (String httpMethod : httpMethods)
-            for (String path : paths)
-                endpointDescriptors.add(
-                        new EndpointDescriptor(
-                                path,
-                                httpMethod,
-                                queryParams,
-                                pathVars,
-                                consumes,
-                                produces,
-                                method.commentText()
-                        )
-                );
+                    retVal.add(new PathVariableDescriptor(name, text));
+                }
+            }
+        }
 
-        return endpointDescriptors;
+        return retVal;
+    }
+
+    @Override
+    protected Collection<QueryParamDescriptor> generateQueryParams(MethodDoc methodDoc) {
+        Collection<QueryParamDescriptor> retVal = new ArrayList<QueryParamDescriptor> ();
+
+        Tag[] tags = methodDoc.tags(QUERYPARAM_TAG);
+        ParamTag[] paramTags = methodDoc.paramTags();
+
+        for (Parameter parameter : methodDoc.parameters()) {
+            for (AnnotationDesc annotation : parameter.annotations()) {
+                if (getAnnotationName(annotation).equals(PARAM_ANNOTATION)) {
+                    String name = parameter.name();
+                    List<String> values = getElementValue(annotation, "value");
+                    if (!values.isEmpty())
+                        name = values.get(0);
+
+                    //first check for special tag, then check regular param tag, finally default to empty string
+                    String text = findParamText(tags, name);
+                    if (text == null)
+                        text = findParamText(paramTags, parameter.name());
+                    if (text == null)
+                        text = "";
+
+                    retVal.add(new QueryParamDescriptor(name, false, text));
+                }
+            }
+        }
+        return retVal;
+    }
+
+    @Override
+    protected Collection<String> resolveHttpMethods(EndpointMapping classMapping, EndpointMapping methodMapping) {
+        //Only methods should have http methods.
+        return methodMapping.getHttpMethods();
     }
 }

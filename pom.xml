@@ -18,14 +18,6 @@
         <commons.io.version>2.4</commons.io.version>
     </properties>
 
-    <dependencies>
-        <dependency>
-            <groupId>commons-io</groupId>
-            <artifactId>commons-io</artifactId>
-            <version>${commons.io.version}</version>
-        </dependency>
-    </dependencies>
-
     <profiles>
         <profile>
             <id>platform-macosx</id>
