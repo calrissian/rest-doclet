@@ -1,5 +1,4 @@
-package restdoclet.collector.spring;
-
+package restdoclet.collector.jaxrs;
 
 import com.sun.javadoc.AnnotationDesc;
 import com.sun.javadoc.ClassDoc;
@@ -13,26 +12,36 @@ import restdoclet.model.QueryParamDescriptor;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 
 import static java.util.Arrays.asList;
-import static java.util.Collections.emptySet;
-import static restdoclet.collector.spring.SpringCollectorUtils.*;
+import static restdoclet.collector.jaxrs.JaxRSCollectorUtils.*;
 import static restdoclet.util.AnnotationUtils.getAnnotationName;
 import static restdoclet.util.CommonUtils.firstNonEmpty;
 import static restdoclet.util.CommonUtils.isEmpty;
 import static restdoclet.util.TagUtils.IGNORE_TAG;
 
-public class SpringCollector extends AbstractCollector {
-
+public class JaxRSCollector extends AbstractCollector{
     @Override
     protected boolean shouldIgnoreClass(ClassDoc classDoc, Configuration config) {
 
-        //If found a controller annotation then don't ignore this class.
-        for (AnnotationDesc classAnnotation : classDoc.annotations())
-            if (CONTROLLER_ANNOTATION.equals(getAnnotationName(classAnnotation)))
+        //Look for any JAXRS annotations in the class or the methods.  If found then don't ignore this class.
+        for (AnnotationDesc classAnnotation : classDoc.annotations()) {
+            String annotationName = getAnnotationName(classAnnotation);
+            if (annotationName != null && annotationName.startsWith(ANNOTATION_PACKAGE))
                 return false;
 
-        //If not found then ignore this class.
+        }
+
+        for (MethodDoc methodDoc : classDoc.methods(true)) {
+            for (AnnotationDesc methodAnnotation : methodDoc.annotations()) {
+                String annotationName = getAnnotationName(methodAnnotation);
+                if (annotationName != null && annotationName.startsWith(ANNOTATION_PACKAGE))
+                    return false;
+
+            }
+        }
+
         return true;
     }
 
@@ -44,11 +53,9 @@ public class SpringCollector extends AbstractCollector {
     protected Collection<EndpointDescriptor> getEndpoints(String contextPath, ClassDoc classDoc, EndpointMapping classMapping) {
         Collection<EndpointDescriptor> endpointDescriptors = new ArrayList<EndpointDescriptor>();
 
-        for (MethodDoc method : classDoc.methods(true)) {
-            for (AnnotationDesc annotation : method.annotations())
-                if (MAPPING_ANNOTATION.equals(getAnnotationName(annotation)))
-                    endpointDescriptors.addAll(getSingleEndpoint(contextPath, classMapping, method));
-        }
+        for (MethodDoc method : classDoc.methods(true))
+            endpointDescriptors.addAll(getSingleEndpoint(contextPath, classMapping, method));
+
 
         //Check super classes for inherited request mappings
         if (classDoc.superclass() != null)
@@ -61,14 +68,13 @@ public class SpringCollector extends AbstractCollector {
 
         //If the ignore tag is present then simply return nothing for this endpoint.
         if (!isEmpty(method.tags(IGNORE_TAG)))
-            return emptySet();
+            return Collections.emptyList();
 
         Collection<EndpointDescriptor> endpointDescriptors = new ArrayList<EndpointDescriptor>();
         EndpointMapping methodMapping = getEndpointMapping(method);
 
         Collection<String> paths = generatePaths(contextPath, classMapping, methodMapping);
-        Collection<String> httpMethods = firstNonEmpty(methodMapping.getHttpMethods(), classMapping.getHttpMethods(), asList("GET"));
-
+        Collection<String> httpMethods = methodMapping.getHttpMethods();
         Collection<String> consumes = firstNonEmpty(methodMapping.getConsumes(), classMapping.getConsumes());
         Collection<String> produces = firstNonEmpty(methodMapping.getProduces(), classMapping.getProduces());
         Collection<PathVariableDescriptor> pathVars = generatePathVars(method);

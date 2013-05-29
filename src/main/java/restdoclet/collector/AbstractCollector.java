@@ -10,6 +10,8 @@ import restdoclet.model.EndpointDescriptor;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 import static restdoclet.util.CommonUtils.isEmpty;
 import static restdoclet.util.TagUtils.CONTEXT_TAG;
@@ -108,5 +110,33 @@ public abstract class AbstractCollector implements Collector{
      */
     protected String getDescription(ClassDoc classDoc) {
         return classDoc.commentText();
+    }
+
+    protected Set<String> generatePaths(String contextPath, EndpointMapping classMapping, EndpointMapping methodMapping) {
+
+        contextPath = (contextPath == null ? "" : contextPath);
+
+        //Build all the paths based on the class level, plus the method extensions.
+        LinkedHashSet<String> paths = new LinkedHashSet<String>();
+
+        if (isEmpty(classMapping.getPaths())) {
+
+            for (String path : methodMapping.getPaths())
+                paths.add(contextPath + path);
+
+        } else if (isEmpty(methodMapping.getPaths())) {
+
+            for (String path : classMapping.getPaths())
+                paths.add(contextPath + path);
+
+        } else {
+
+            for (String defaultPath : classMapping.getPaths())
+                for (String path : methodMapping.getPaths())
+                    paths.add(contextPath + defaultPath + path);
+
+        }
+
+        return paths;
     }
 }

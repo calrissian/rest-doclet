@@ -3,6 +3,9 @@ package restdoclet.util;
 import java.io.Closeable;
 import java.io.IOException;
 import java.util.Collection;
+import java.util.Collections;
+
+import static java.util.Collections.emptySet;
 
 /**
  * Simple utilities to reduce the number of dependencies needed for the project
@@ -26,5 +29,13 @@ public class CommonUtils {
             closeable.close();
         } catch (IOException e) { /* do nothing */ }
 
+    }
+
+    public static <T> Collection<T> firstNonEmpty(Collection<T>... collections) {
+        for (Collection<T> collection : collections)
+            if (!isEmpty(collection))
+                return collection;
+
+        return emptySet();
     }
 }

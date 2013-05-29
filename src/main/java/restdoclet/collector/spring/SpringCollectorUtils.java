@@ -1,25 +1,25 @@
 package restdoclet.collector.spring;
 
 import com.sun.javadoc.*;
+import restdoclet.collector.EndpointMapping;
 import restdoclet.model.PathVariableDescriptor;
 import restdoclet.model.QueryParamDescriptor;
 
 import java.util.*;
 
 import static java.lang.Boolean.TRUE;
-import static java.util.Arrays.asList;
 import static restdoclet.util.AnnotationUtils.getAnnotationName;
 import static restdoclet.util.AnnotationUtils.getElementValue;
 import static restdoclet.util.CommonUtils.isEmpty;
 import static restdoclet.util.TagUtils.*;
 
-public class CollectorUtils {
-    private CollectorUtils() {}
+public class SpringCollectorUtils {
+    private SpringCollectorUtils() {}
 
     protected static final String CONTROLLER_ANNOTATION = "org.springframework.stereotype.Controller";
     protected static final String MAPPING_ANNOTATION = "org.springframework.web.bind.annotation.RequestMapping";
-    protected static String PATHVAR_ANNOTATION = "org.springframework.web.bind.annotation.PathVariable";
-    protected static String PARAM_ANNOTATION = "org.springframework.web.bind.annotation.RequestParam";
+    protected static final String PATHVAR_ANNOTATION = "org.springframework.web.bind.annotation.PathVariable";
+    protected static final String PARAM_ANNOTATION = "org.springframework.web.bind.annotation.RequestParam";
 
     protected static EndpointMapping getEndpointMapping(ProgramElementDoc doc) {
 
@@ -51,52 +51,7 @@ public class CollectorUtils {
         );
     }
 
-    protected static Set<String> generatePaths(String contextPath, EndpointMapping classMapping, EndpointMapping methodMapping) {
 
-        contextPath = (contextPath == null ? "" : contextPath);
-
-        //Build all the paths based on the class level, plus the method extensions.
-        LinkedHashSet<String> paths = new LinkedHashSet<String>();
-
-        if (isEmpty(classMapping.getPaths())) {
-
-            for (String path : methodMapping.getPaths())
-                paths.add(contextPath + path);
-
-        } else if (isEmpty(methodMapping.getPaths())) {
-
-            for (String path : classMapping.getPaths())
-                paths.add(contextPath + path);
-
-        } else {
-
-            for (String defaultPath : classMapping.getPaths())
-                for (String path : methodMapping.getPaths())
-                    paths.add(contextPath + defaultPath + path);
-
-        }
-
-        return paths;
-    }
-
-    private static <T> Collection<T> methodOverridesClassHelper(Collection<T> classValues, Collection<T> methodValues, Collection<T> defaultValues) {
-        if (!isEmpty(methodValues))
-            return methodValues;
-
-        return (isEmpty(classValues) ? defaultValues : classValues);
-    }
-
-    protected static Collection<String> getHttpMethods(EndpointMapping classMapping, EndpointMapping methodMapping) {
-        return methodOverridesClassHelper(classMapping.getHttpMethods(), methodMapping.getHttpMethods(), asList("GET"));
-    }
-
-    protected static Collection<String> getConsumes(EndpointMapping classMapping, EndpointMapping methodMapping) {
-        return methodOverridesClassHelper(classMapping.getConsumes(), methodMapping.getConsumes(), Collections.<String>emptySet());
-    }
-
-    protected static Collection<String> getProduces(EndpointMapping classMapping, EndpointMapping methodMapping) {
-        return methodOverridesClassHelper(classMapping.getProduces(), methodMapping.getProduces(), Collections.<String>emptySet());
-    }
 
     protected static Collection<PathVariableDescriptor> generatePathVars(MethodDoc methodDoc) {
         Collection<PathVariableDescriptor> retVal = new ArrayList<PathVariableDescriptor>();
@@ -162,38 +117,4 @@ public class CollectorUtils {
         return retVal;
     }
 
-    protected static class EndpointMapping {
-        private final Collection<String> paths;
-        private final Collection<String> httpMethods;
-        private final Collection<String> consumes;
-        private final Collection<String> produces;
-
-        public EndpointMapping(
-                Collection<String> paths,
-                Collection<String> httpMethods,
-                Collection<String> consumes,
-                Collection<String> produces) {
-
-            this.paths = paths;
-            this.httpMethods = httpMethods;
-            this.consumes = consumes;
-            this.produces = produces;
-        }
-
-        public Collection<String> getPaths() {
-            return paths;
-        }
-
-        public Collection<String> getHttpMethods() {
-            return httpMethods;
-        }
-
-        public Collection<String> getConsumes() {
-            return consumes;
-        }
-
-        public Collection<String> getProduces() {
-            return produces;
-        }
-    }
 }

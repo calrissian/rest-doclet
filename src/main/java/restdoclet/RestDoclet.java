@@ -3,10 +3,12 @@ package restdoclet;
 
 import com.sun.javadoc.Doclet;
 import com.sun.javadoc.RootDoc;
+import restdoclet.collector.jaxrs.JaxRSCollector;
 import restdoclet.collector.spring.SpringCollector;
 import restdoclet.model.ClassDescriptor;
 import restdoclet.writer.SimpleHtmlWriter;
 
+import java.util.ArrayList;
 import java.util.Collection;
 
 public class RestDoclet extends Doclet {
@@ -21,7 +23,9 @@ public class RestDoclet extends Doclet {
 
         Configuration config = new Configuration(root.options());
 
-        Collection<ClassDescriptor> classDescriptors =  new SpringCollector().getDescriptors(root, config);
+        Collection<ClassDescriptor> classDescriptors = new ArrayList<ClassDescriptor>();
+        classDescriptors.addAll(new SpringCollector().getDescriptors(root, config));
+        classDescriptors.addAll(new JaxRSCollector().getDescriptors(root, config));
 
         new SimpleHtmlWriter().write(classDescriptors, config);
 
