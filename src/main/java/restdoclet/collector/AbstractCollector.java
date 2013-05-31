@@ -41,7 +41,7 @@ public abstract class AbstractCollector implements Collector {
     protected abstract Collection<QueryParamDescriptor> generateQueryParams(MethodDoc methodDoc);
 
     /**
-     * Will generate aggregate all the rest endpoint class descriptors.
+     * Will generate and aggregate all the rest endpoint class descriptors.
      * @param rootDoc
      * @return
      */
