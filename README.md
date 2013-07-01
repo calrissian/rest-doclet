@@ -31,7 +31,7 @@ public class Example {
 
 Additional Tags
 ---------------
-There are some limitations to using simple annotations and javadocs.  The rest-doclet allows you to customize the behavior of the rest generation process via the use of special javadoc tags.  
+There are some limitations to using simple annotations and javadocs.  The rest-doclet allows you to customize the behavior of the REST document generation process via the use of special javadoc tags.  
 
  * @ignore - Can be used at the class or method level and will exclude that information from the documentation.
  * @contextPath [value] - Used in the class javadoc to define what the context path to prepend to the relative path of the endpoint.
