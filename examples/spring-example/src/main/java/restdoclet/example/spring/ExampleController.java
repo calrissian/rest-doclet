@@ -1,10 +1,7 @@
 package restdoclet.example.spring;
 
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -34,8 +31,8 @@ public class ExampleController {
      *
      */
 
-    int count = 0;
-    Map<String, String> userColors = new HashMap<String, String>();
+    private static int count = 0;
+    private static Map<String, String> userColors = new HashMap<String, String>();
 
     /**
      * Simply adds the value provided via the query parameter to a running total.
@@ -43,7 +40,7 @@ public class ExampleController {
      * @param value Value to be added to a running total.
      * @return The current total.
      */
-    @RequestMapping(value = "/add", method = POST)
+    @RequestMapping(value = "/add", method = POST, produces = "text/plain")
     @ResponseBody
     public int postExample(@RequestParam int value) {
         count += value;
@@ -58,7 +55,7 @@ public class ExampleController {
      * @pathVar name Name of the user to retrieve the color for
      * @queryParam normalize If set to "true" the name of the color will be normalized before being returned.
      */
-    @RequestMapping("/user/{name}/color")
+    @RequestMapping(value = "/user/{name}/color", produces = "text/plain")
     @ResponseBody
     public String getColor(@PathVariable("name") String userId, @RequestParam(required = false) boolean normalize) {
         if (!userColors.containsKey(userId))
@@ -75,9 +72,9 @@ public class ExampleController {
      * @pathVar name Name of the user to store the color for
      * @queryParam color The color to give to the user
      */
-    @RequestMapping(value = "/user/{name}/color", method = {POST, PUT})
+    @RequestMapping(value = "/user/{name}/color", method = {POST, PUT}, consumes = "text/plain", produces = "text/plain")
     @ResponseBody
-    public String setColor(@PathVariable("name") String userId, @RequestParam(value = "color", required = true) String value) {
+    public String setColor(@PathVariable("name") String userId, @RequestBody String value) {
         userColors.put(userId, value);
         return getColor(userId, false);
     }

@@ -16,6 +16,7 @@
     </description>
 
     <modules>
+        <module>jaxrs-example</module>
         <module>spring-example</module>
     </modules>
 
