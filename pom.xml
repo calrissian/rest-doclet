@@ -3,9 +3,9 @@
 
     <modelVersion>4.0.0</modelVersion>
     <groupId>rest-doclet</groupId>
-    <artifactId>rest-doclet</artifactId>
+    <artifactId>rest-doclet-parent</artifactId>
     <version>0.1-SNAPSHOT</version>
-    <packaging>jar</packaging>
+    <packaging>pom</packaging>
     <inceptionYear>2013</inceptionYear>
 
     <description>
@@ -16,45 +16,10 @@
         <java.version>1.6</java.version>
     </properties>
 
-    <profiles>
-        <profile>
-            <id>platform-macosx</id>
-            <activation>
-                <file>
-                    <exists>${java.home}/../Classes/classes.jar</exists>
-                </file>
-            </activation>
-
-            <dependencies>
-                <dependency>
-                    <groupId>com.sun</groupId>
-                    <artifactId>tools</artifactId>
-                    <version>${java.version}</version>
-                    <scope>system</scope>
-                    <systemPath>${java.home}/../Classes/classes.jar</systemPath>
-                </dependency>
-            </dependencies>
-        </profile>
-
-        <profile>
-            <id>other-os</id>
-            <activation>
-                <file>
-                    <exists>${java.home}/../lib/tools.jar</exists>
-                </file>
-            </activation>
-
-            <dependencies>
-                <dependency>
-                    <groupId>com.sun</groupId>
-                    <artifactId>tools</artifactId>
-                    <version>${java.version}</version>
-                    <scope>system</scope>
-                    <systemPath>${java.home}/../lib/tools.jar</systemPath>
-                </dependency>
-            </dependencies>
-        </profile>
-    </profiles>
+    <modules>
+        <module>rest-doclet</module>
+        <module>examples</module>
+    </modules>
 
     <build>
         <plugins>
@@ -65,18 +30,7 @@
                     <target>${java.version}</target>
                 </configuration>
             </plugin>
-
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-resources-plugin</artifactId>
-            </plugin>
         </plugins>
-        <resources>
-            <resource>
-                <filtering>true</filtering>
-                <directory>src/main/resources</directory>
-            </resource>
-        </resources>
     </build>
 
 </project>
