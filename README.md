@@ -7,13 +7,13 @@ How it works
 ------------
 There is no special configurations required in your code to allow this doclet to extract basic information about your REST endpoints if they use Spring or JAX-RS annotations.  Simply using annotations the doclet can extract basic information about how an endpoint should be called.  Additionally all documentation of the endpoints including their query parameters and path parameters are extracted directly from the javadoc comments in each class and method.
 
-Using the following example Spring endpoint description the doclet will recognize one endpoint("/example/name") with a single path parameter("name") and a single query parameter("normalize").
+Using the following example Spring endpoint description the doclet will recognize one endpoint("/foo/name") with a single path parameter("name") and a single query parameter("normalize").
 ```java
 /**
  * Example Rest Definition
  */
 @Controller
-@RequestMapping("/example")
+@RequestMapping("/foo")
 public class Example {
 
     /**
@@ -47,7 +47,7 @@ Using the following example shows how these can be used with the previous Spring
  * @contextPath /examples
  */
 @Controller
-@RequestMapping("/metrics")
+@RequestMapping("/foo")
 public class Example {
 
     /**
