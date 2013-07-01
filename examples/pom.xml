@@ -30,6 +30,7 @@
         </plugins>
     </build>
 
+    <!--Define the doclet config here for both example projects -->
     <reporting>
         <plugins>
             <plugin>

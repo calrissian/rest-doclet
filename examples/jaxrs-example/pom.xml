@@ -8,7 +8,7 @@
         <version>0.1-SNAPSHOT</version>
     </parent>
 
-    <artifactId>spring-example</artifactId>
+    <artifactId>jaxrs-example</artifactId>
     <packaging>war</packaging>
 
     <description>
