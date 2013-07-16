@@ -55,12 +55,30 @@ public class CommonUtils {
         return emptySet();
     }
 
-    public static <T> void copy(InputStream input, OutputStream output) throws IOException {
+    public static void copy(InputStream input, OutputStream output) throws IOException {
         byte[] buffer = new byte[1024 * 4];
         int len;
 
         while ((len = input.read(buffer)) > 0 ) {
             output.write(buffer, 0, len);
         }
+    }
+
+    public static String fixPath(String path) {
+
+        //remove duplicates path seperators
+        int len = 0;
+        while (path.length() != len) {
+            len = path.length();
+            path = path.replaceAll("//", "/");
+        }
+
+        if (path.length() > 1 && path.endsWith("/"))
+            path = path.substring(0, path.length() - 2);
+
+        if (!path.startsWith("/"))
+            path = "/" + path;
+
+        return path;
     }
 }

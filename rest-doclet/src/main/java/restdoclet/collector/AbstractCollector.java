@@ -28,6 +28,7 @@ import java.util.LinkedHashSet;
 
 import static java.util.Collections.emptyList;
 import static restdoclet.util.CommonUtils.firstNonEmpty;
+import static restdoclet.util.CommonUtils.fixPath;
 import static restdoclet.util.CommonUtils.isEmpty;
 import static restdoclet.util.TagUtils.*;
 
@@ -210,18 +211,18 @@ public abstract class AbstractCollector implements Collector {
         if (isEmpty(classMapping.getPaths())) {
 
             for (String path : methodMapping.getPaths())
-                paths.add(contextPath + path);
+                paths.add(fixPath(contextPath + path));
 
         } else if (isEmpty(methodMapping.getPaths())) {
 
             for (String path : classMapping.getPaths())
-                paths.add(contextPath + path);
+                paths.add(fixPath(contextPath + path));
 
         } else {
 
             for (String defaultPath : classMapping.getPaths())
                 for (String path : methodMapping.getPaths())
-                    paths.add(contextPath + defaultPath + path);
+                    paths.add(fixPath(contextPath + defaultPath + path));
 
         }
 
