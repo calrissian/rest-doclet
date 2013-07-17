@@ -20,10 +20,10 @@ import java.util.Collection;
 public class ClassDescriptor {
 
     private final String name;
-    private final Collection<EndpointDescriptor> endpoints;
+    private final Collection<Endpoint> endpoints;
     private final String description;
 
-    public ClassDescriptor(String name, Collection<EndpointDescriptor> endpoints, String description) {
+    public ClassDescriptor(String name, Collection<Endpoint> endpoints, String description) {
         this.name = name;
         this.endpoints = endpoints;
         this.description = description;
@@ -33,7 +33,7 @@ public class ClassDescriptor {
         return name;
     }
 
-    public Collection<EndpointDescriptor> getEndpoints() {
+    public Collection<Endpoint> getEndpoints() {
         return endpoints;
     }
 

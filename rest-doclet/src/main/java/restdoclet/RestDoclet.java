@@ -23,8 +23,8 @@ import restdoclet.collector.Collector;
 import restdoclet.collector.jaxrs.JaxRSCollector;
 import restdoclet.collector.spring.SpringCollector;
 import restdoclet.model.ClassDescriptor;
-import restdoclet.writer.SimpleHtmlWriter;
-import restdoclet.writer.SwaggerWriter;
+import restdoclet.writer.simple.SimpleHtmlWriter;
+import restdoclet.writer.swagger.SwaggerWriter;
 import restdoclet.writer.Writer;
 
 import java.util.ArrayList;

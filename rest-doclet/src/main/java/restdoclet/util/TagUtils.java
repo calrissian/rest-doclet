@@ -25,6 +25,7 @@ public class TagUtils {
     public static final String NAME_TAG = "name";
     public static final String PATHVAR_TAG = "pathVar";
     public static final String QUERYPARAM_TAG = "queryParam";
+    public static final String REQUESTBODY_TAG = "requestBody";
 
     public static String findParamText(Tag[] tags, String name) {
         for (Tag tag : tags)

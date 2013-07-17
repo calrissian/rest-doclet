@@ -17,10 +17,7 @@ package restdoclet.collector;
 
 
 import com.sun.javadoc.*;
-import restdoclet.model.ClassDescriptor;
-import restdoclet.model.EndpointDescriptor;
-import restdoclet.model.PathVariableDescriptor;
-import restdoclet.model.QueryParamDescriptor;
+import restdoclet.model.*;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -35,8 +32,9 @@ public abstract class AbstractCollector implements Collector {
     protected abstract boolean shouldIgnoreClass(ClassDoc classDoc);
     protected abstract boolean shouldIgnoreMethod(MethodDoc methodDoc);
     protected abstract EndpointMapping getEndpointMapping(ProgramElementDoc doc);
-    protected abstract Collection<PathVariableDescriptor> generatePathVars(MethodDoc methodDoc);
-    protected abstract Collection<QueryParamDescriptor> generateQueryParams(MethodDoc methodDoc);
+    protected abstract Collection<PathVar> generatePathVars(MethodDoc methodDoc);
+    protected abstract Collection<QueryParam> generateQueryParams(MethodDoc methodDoc);
+    protected abstract RequestBody generateRequestBody(MethodDoc methodDoc);
 
     /**
      * Will generate and aggregate all the rest endpoint class descriptors.
@@ -70,7 +68,7 @@ public abstract class AbstractCollector implements Collector {
         if (!isEmpty(classDoc.tags(IGNORE_TAG)) || shouldIgnoreClass(classDoc))
             return null;
 
-        Collection<EndpointDescriptor> endpoints = getAllEndpointDescriptors(getContextPath(classDoc), classDoc, getEndpointMapping(classDoc));
+        Collection<Endpoint> endpoints = getAllEndpoints(getContextPath(classDoc), classDoc, getEndpointMapping(classDoc));
 
         //If there are no endpoints then no use in providing documentation.
         if (isEmpty(endpoints))
@@ -87,27 +85,27 @@ public abstract class AbstractCollector implements Collector {
     }
 
     /**
-     * Retrieves all the end point descriptors provided in the specified class doc.
+     * Retrieves all the end point provided in the specified class doc.
      * @param contextPath
      * @param classDoc
      * @param classMapping
      * @return
      */
-    protected Collection<EndpointDescriptor> getAllEndpointDescriptors(String contextPath, ClassDoc classDoc, EndpointMapping classMapping) {
-        Collection<EndpointDescriptor> endpointDescriptors = new ArrayList<EndpointDescriptor>();
+    protected Collection<Endpoint> getAllEndpoints(String contextPath, ClassDoc classDoc, EndpointMapping classMapping) {
+        Collection<Endpoint> endpoints = new ArrayList<Endpoint>();
 
         for (MethodDoc method : classDoc.methods(true))
-            endpointDescriptors.addAll(getEndpointDescriptors(contextPath, classMapping, method));
+            endpoints.addAll(getEndpoint(contextPath, classMapping, method));
 
         //Check super classes for inherited methods
         if (classDoc.superclass() != null)
-            endpointDescriptors.addAll(getAllEndpointDescriptors(contextPath, classDoc.superclass(), classMapping));
+            endpoints.addAll(getAllEndpoints(contextPath, classDoc.superclass(), classMapping));
 
-        return endpointDescriptors;
+        return endpoints;
     }
 
     /**
-     * Retrieves the endpoint descriptors for a single method.
+     * Retrieves the endpoint for a single method.
      *
      * If any method contains the special javadoc tag {@link restdoclet.util.TagUtils.IGNORE_TAG} it will be excluded.
      * @param contextPath
@@ -115,30 +113,32 @@ public abstract class AbstractCollector implements Collector {
      * @param method
      * @return
      */
-    protected Collection<EndpointDescriptor> getEndpointDescriptors(String contextPath, EndpointMapping classMapping, MethodDoc method) {
+    protected Collection<Endpoint> getEndpoint(String contextPath, EndpointMapping classMapping, MethodDoc method) {
 
         //If the ignore tag is present then simply return nothing for this endpoint.
         if (!isEmpty(method.tags(IGNORE_TAG)) || shouldIgnoreMethod(method))
             return emptyList();
 
-        Collection<EndpointDescriptor> endpointDescriptors = new ArrayList<EndpointDescriptor>();
+        Collection<Endpoint> endpoints = new ArrayList<Endpoint>();
         EndpointMapping methodMapping = getEndpointMapping(method);
 
         Collection<String> paths = resolvePaths(contextPath, classMapping, methodMapping);
         Collection<String> httpMethods = resolveHttpMethods(classMapping, methodMapping);
         Collection<String> consumes = resolveConsumesInfo(classMapping, methodMapping);
         Collection<String> produces = resolvesProducesInfo(classMapping, methodMapping);
-        Collection<PathVariableDescriptor> pathVars = generatePathVars(method);
-        Collection<QueryParamDescriptor> queryParams = generateQueryParams(method);
+        Collection<PathVar> pathVars = generatePathVars(method);
+        Collection<QueryParam> queryParams = generateQueryParams(method);
+        RequestBody requestBody = generateRequestBody(method);
 
         for (String httpMethod : httpMethods)
             for (String path : paths)
-                endpointDescriptors.add(
-                        new EndpointDescriptor(
+                endpoints.add(
+                        new Endpoint(
                                 path,
                                 httpMethod,
                                 queryParams,
                                 pathVars,
+                                requestBody,
                                 consumes,
                                 produces,
                                 method.commentText(),
@@ -146,7 +146,7 @@ public abstract class AbstractCollector implements Collector {
                         )
                 );
 
-        return endpointDescriptors;
+        return endpoints;
     }
 
     /**

@@ -19,9 +19,7 @@ package restdoclet.example.jaxrs;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import java.util.HashMap;
-import java.util.LinkedHashSet;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * Example implementation of a REST endpoints using JAX-RS to highlight documentation features.
@@ -49,8 +47,8 @@ public class ExampleController {
     @POST
     @Produces(MediaType.TEXT_PLAIN)
     @Path("/add")
-    public int postExample(@QueryParam("value") int[] value) {
-        count += value[0];
+    public int postExample(@QueryParam("value") int value) {
+        count += value;
         return count;
     }
 
@@ -83,10 +81,9 @@ public class ExampleController {
     @Consumes(MediaType.TEXT_PLAIN)
     @Produces(MediaType.TEXT_PLAIN)
     @Path("/user/{name}/color")
-    public Set<String> setColor(@PathParam("name") String userId, String value) {
+    public String setColor(@PathParam("name") String userId, String value) {
         userColors.put(userId, value);
-        //return getColor(userId, false);
-        return new LinkedHashSet<String>();
+        return getColor(userId, false);
     }
 
 }

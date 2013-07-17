@@ -1,16 +1,14 @@
-package restdoclet.writer;
+package restdoclet.writer.swagger;
 
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.sun.javadoc.ClassDoc;
-import com.sun.javadoc.ParameterizedType;
-import com.sun.javadoc.Type;
 import restdoclet.Configuration;
 import restdoclet.model.ClassDescriptor;
-import restdoclet.model.EndpointDescriptor;
-import restdoclet.model.PathVariableDescriptor;
-import restdoclet.model.QueryParamDescriptor;
+import restdoclet.model.Endpoint;
+import restdoclet.model.PathVar;
+import restdoclet.model.QueryParam;
+import restdoclet.writer.Writer;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -21,8 +19,9 @@ import java.util.zip.ZipInputStream;
 
 import static java.util.Map.Entry;
 import static restdoclet.util.CommonUtils.*;
+import static restdoclet.writer.swagger.TypeUtils.*;
 
-public class SwaggerWriter implements Writer{
+public class SwaggerWriter implements Writer {
     public static final String OUTPUT_OPTION_NAME = "swagger";
     private static final String SWAGGER_UI_ARTIFACT = "swagger-ui.zip";
     private static final String SWAGGER_VERSION = "1.2";
@@ -110,7 +109,7 @@ public class SwaggerWriter implements Writer{
 
     private static void writeApi(String path, Collection<ClassDescriptor> descriptors, Configuration config) {
         JsonGenerator generator = null;
-        Map<String, Collection<EndpointDescriptor>> pathGroups = groupPaths(descriptors);
+        Map<String, Collection<Endpoint>> pathGroups = groupPaths(descriptors);
 
         try {
             new File("./" + API_DOC_DIR + path).getParentFile().mkdirs();
@@ -123,12 +122,12 @@ public class SwaggerWriter implements Writer{
                 generator.writeStringField("apiVersion", config.getApiVersion());
 
             generator.writeArrayFieldStart("apis");
-            for (Entry<String, Collection<EndpointDescriptor>> entry : pathGroups.entrySet()) {
+            for (Entry<String, Collection<Endpoint>> entry : pathGroups.entrySet()) {
                 generator.writeStartObject();
                 generator.writeStringField("path", entry.getKey());
                 generator.writeStringField("description", "");
                 generator.writeArrayFieldStart("operations");
-                for (EndpointDescriptor endpoint : entry.getValue()) {
+                for (Endpoint endpoint : entry.getValue()) {
                     writeEndpoint(endpoint, generator);
                 }
                 generator.writeEndArray();
@@ -145,7 +144,7 @@ public class SwaggerWriter implements Writer{
         }
     }
 
-    private static void writeEndpoint(EndpointDescriptor endpoint, JsonGenerator generator) throws IOException {
+    private static void writeEndpoint(Endpoint endpoint, JsonGenerator generator) throws IOException {
         String returnType = dataType(endpoint.getType());
 
         generator.writeStartObject();
@@ -156,16 +155,13 @@ public class SwaggerWriter implements Writer{
         if (returnType != null)
             generator.writeStringField("responseClass", returnType);
 
-        generator.writeArrayFieldStart("produces");
         if (!isEmpty(endpoint.getProduces())) {
+            generator.writeArrayFieldStart("produces");
             for (String produces : endpoint.getProduces())
                 generator.writeString(produces);
 
-        } else {
-            generator.writeString("text/plain");    //default to text/plain if we don't know the type.
+            generator.writeEndArray();
         }
-        generator.writeEndArray();
-
         if (!isEmpty(endpoint.getConsumes())) {
             generator.writeArrayFieldStart("consumes");
             for (String consumes : endpoint.getConsumes()) {
@@ -173,8 +169,9 @@ public class SwaggerWriter implements Writer{
             }
             generator.writeEndArray();
         }
+
         generator.writeArrayFieldStart("parameters");
-        for (PathVariableDescriptor pathVar : endpoint.getPathVars()) {
+        for (PathVar pathVar : endpoint.getPathVars()) {
             generator.writeStartObject();
             generator.writeStringField("paramType", "path");
             generator.writeStringField("name", pathVar.getName());
@@ -184,7 +181,7 @@ public class SwaggerWriter implements Writer{
             generator.writeBooleanField("allowMultiple", false);
             generator.writeEndObject();
         }
-        for (QueryParamDescriptor queryParam : endpoint.getQueryParams()) {
+        for (QueryParam queryParam : endpoint.getQueryParams()) {
             //If it is a container type then allow multiple but use the underlying type.
             boolean container = isContainer(queryParam.getType());
             String type = (container ? internalContainerType(queryParam.getType()) : basicType(queryParam.getType()));
@@ -196,6 +193,16 @@ public class SwaggerWriter implements Writer{
             generator.writeStringField("dataType", type);
             generator.writeBooleanField("required", queryParam.isRequired());
             generator.writeBooleanField("allowMultiple", container);
+            generator.writeEndObject();
+        }
+        if (endpoint.getRequestBody() != null) {
+            generator.writeStartObject();
+            generator.writeStringField("paramType", "body");
+            generator.writeStringField("name", endpoint.getRequestBody().getName());
+            generator.writeStringField("description", endpoint.getRequestBody().getDescription());
+            generator.writeStringField("dataType", dataType(endpoint.getRequestBody().getType()));
+            generator.writeBooleanField("required", true);
+            generator.writeBooleanField("allowMultiple", false);
             generator.writeEndObject();
         }
         generator.writeEndArray();
@@ -216,7 +223,7 @@ public class SwaggerWriter implements Writer{
             return "/";
 
         List<String> paths = new ArrayList<String>(classDescriptor.getEndpoints().size());
-        for (EndpointDescriptor endpoint : classDescriptor.getEndpoints())
+        for (Endpoint endpoint : classDescriptor.getEndpoints())
             paths.add(endpoint.getPath());
 
         Collections.sort(paths);
@@ -233,14 +240,14 @@ public class SwaggerWriter implements Writer{
         return fixPath(longest);
     }
 
-    private static Map<String, Collection<EndpointDescriptor>> groupPaths (Collection<ClassDescriptor> classDescriptors) {
-        Map<String, Collection<EndpointDescriptor>> paths = new LinkedHashMap<String, Collection<EndpointDescriptor>>();
+    private static Map<String, Collection<Endpoint>> groupPaths (Collection<ClassDescriptor> classDescriptors) {
+        Map<String, Collection<Endpoint>> paths = new LinkedHashMap<String, Collection<Endpoint>>();
         for (ClassDescriptor classDescriptor : classDescriptors) {
-            for (EndpointDescriptor endpoint : classDescriptor.getEndpoints()) {
+            for (Endpoint endpoint : classDescriptor.getEndpoints()) {
                 if (paths.containsKey(endpoint.getPath())) {
                     paths.get(endpoint.getPath()).add(endpoint);
                 } else {
-                    Collection<EndpointDescriptor> tmp = new ArrayList<EndpointDescriptor>();
+                    Collection<Endpoint> tmp = new ArrayList<Endpoint>();
                     tmp.add(endpoint);
                     paths.put(endpoint.getPath(), tmp);
                 }
@@ -250,102 +257,5 @@ public class SwaggerWriter implements Writer{
         return paths;
     }
 
-    private static String dataType(Type type) {
-        if (type == null)
-            return null;
 
-        if (isContainer(type)) {
-            //treat sets as sets
-            if (isSub(type.asClassDoc(), Set.class))
-                return "Set[" + internalContainerType(type) + "]";
-
-            return "List[" + internalContainerType(type) + "]";
-        }
-
-        //Treat as a basic type.
-        return basicType(type);
-    }
-
-    private static boolean isContainer(Type type) {
-
-        //first check for arrays
-        if (type.dimension() != null && !type.dimension().isEmpty())
-            return true;
-
-        //treat iterables as lists
-        if (isSub(type.asClassDoc(), Iterable.class))
-            return true;
-
-        return false;
-    }
-
-    private static String internalContainerType(Type type) {
-        //treat arrays first
-        if (type.dimension() != null && !type.dimension().isEmpty())
-            return basicType(type);
-
-        ParameterizedType pType = type.asParameterizedType();
-        if (pType != null) {
-            Type[] paramTypes = ((ParameterizedType)type).typeArguments();
-            if (!isEmpty(paramTypes))
-                return basicType(paramTypes[0]);
-        }
-
-        return "Object";
-    }
-
-    private static String basicType(Type type) {
-        if (type == null)
-            return "void";
-
-        //next primitives
-        if (type.isPrimitive())
-            return type.qualifiedTypeName();
-
-        String name = type.qualifiedTypeName();
-
-        if (name.equals(Byte.class.getName()))
-            return "byte";
-
-        if (name.equals(Boolean.class.getName()))
-            return "boolean";
-
-        if (name.equals(Integer.class.getName()))
-            return "int";
-
-        if (name.equals(Long.class.getName()))
-            return "long";
-
-        if (name.equals(Float.class.getName()))
-            return "float";
-
-        if (name.equals(Double.class.getName()))
-            return "double";
-
-        if (name.equals(String.class.getName()))
-            return "string";
-
-        if (name.equals(Date.class.getName()))
-            return "Date";
-
-        return "Object";
-    }
-
-    private static <T> boolean isSub (ClassDoc classDoc, Class<T> targetClazz) {
-        if (classDoc == null)
-            return false;
-
-        if (classDoc.qualifiedTypeName().equals(targetClazz.getName()))
-            return true;
-
-        if (isSub(classDoc.superclass(), targetClazz))
-            return true;
-
-        for (ClassDoc iface : classDoc.interfaces())
-            if (isSub(iface, targetClazz))
-                return true;
-
-
-        return false;
-    }
 }

@@ -18,7 +18,8 @@ package restdoclet.example.spring;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
 
 import static org.springframework.web.bind.annotation.RequestMethod.POST;
 import static org.springframework.web.bind.annotation.RequestMethod.PUT;
@@ -56,8 +57,8 @@ public class ExampleController {
      */
     @RequestMapping(value = "/add", method = POST, produces = "text/plain")
     @ResponseBody
-    public int postExample(@RequestParam int[] value) {
-        count += value[0];
+    public int postExample(@RequestParam int value) {
+        count += value;
         return count;
     }
 
@@ -88,10 +89,9 @@ public class ExampleController {
      */
     @RequestMapping(value = "/user/{name}/color", method = {POST, PUT}, consumes = "text/plain", produces = "text/plain")
     @ResponseBody
-    public Set<String> setColor(@PathVariable("name") String userId, @RequestBody List<String> value) {
-        userColors.put(userId, value.get(0));
-        //return getColor(userId, false);
-        return new LinkedHashSet<String>();
+    public String setColor(@PathVariable("name") String userId, @RequestBody String value) {
+        userColors.put(userId, value);
+        return getColor(userId, false);
     }
 
 }

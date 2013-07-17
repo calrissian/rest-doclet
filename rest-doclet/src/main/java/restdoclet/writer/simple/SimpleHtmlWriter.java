@@ -13,20 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *******************************************************************************/
-package restdoclet.writer;
+package restdoclet.writer.simple;
 
 import restdoclet.Configuration;
 import restdoclet.model.ClassDescriptor;
-import restdoclet.model.EndpointDescriptor;
-import restdoclet.model.PathVariableDescriptor;
-import restdoclet.model.QueryParamDescriptor;
+import restdoclet.model.Endpoint;
+import restdoclet.model.PathVar;
+import restdoclet.model.QueryParam;
+import restdoclet.writer.*;
 
 import java.io.*;
 import java.util.Collection;
 
 import static restdoclet.util.CommonUtils.*;
 
-public class SimpleHtmlWriter implements Writer{
+public class SimpleHtmlWriter implements restdoclet.writer.Writer {
 
     private static final String DEFAULT_STYLESHEET = "default-stylesheet.css";
 
@@ -89,7 +90,7 @@ public class SimpleHtmlWriter implements Writer{
                 out.println("<h3>" + classDescriptor.getName() + "</h3>" );
                 out.print("<div class=\"bean_description\">" + classDescriptor.getDescription() + "</div>");
 
-                for (EndpointDescriptor endpoint: classDescriptor.getEndpoints()) {
+                for (Endpoint endpoint: classDescriptor.getEndpoints()) {
                     out.println("<table class=\"endpoint\">");
                     out.println("<colgroup>");
                     out.println("<col style=\"width: 10%;\" />");
@@ -113,7 +114,7 @@ public class SimpleHtmlWriter implements Writer{
 
                         out.println("<div class=\"info_title\">Path Variables</div>");
                         out.println("<table width=\"100%\" class=\"list\">");
-                        for (PathVariableDescriptor pathVar : endpoint.getPathVars()) {
+                        for (PathVar pathVar : endpoint.getPathVars()) {
                             out.println("<tr>");
                             out.println("<td class=\"code_format\">" + pathVar.getName() + "</td>");
                             out.println("<td class=\"descr_format\">" + pathVar.getDescription() + "</td>");
@@ -126,7 +127,7 @@ public class SimpleHtmlWriter implements Writer{
 
                         out.println("<div class=\"info_title\">Query Parameters</div>");
                         out.println("<table width=\"100%\" class=\"list\">");
-                        for (QueryParamDescriptor queryParam : endpoint.getQueryParams()) {
+                        for (QueryParam queryParam : endpoint.getQueryParams()) {
                             out.println("<tr>");
                             out.println("<td class=\"code_format\">" + queryParam.getName() + (queryParam.isRequired() ? " (required)" : "") + "</td>");
                             out.println("<td class=\"descr_format\">" + queryParam.getDescription() + "</td>");

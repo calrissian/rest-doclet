@@ -18,8 +18,9 @@ package restdoclet.collector.jaxrs;
 import com.sun.javadoc.*;
 import restdoclet.collector.AbstractCollector;
 import restdoclet.collector.EndpointMapping;
-import restdoclet.model.PathVariableDescriptor;
-import restdoclet.model.QueryParamDescriptor;
+import restdoclet.model.PathVar;
+import restdoclet.model.QueryParam;
+import restdoclet.model.RequestBody;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -28,6 +29,7 @@ import java.util.List;
 
 import static restdoclet.util.AnnotationUtils.getAnnotationName;
 import static restdoclet.util.AnnotationUtils.getElementValue;
+import static restdoclet.util.CommonUtils.isEmpty;
 import static restdoclet.util.TagUtils.*;
 
 public class JaxRSCollector extends AbstractCollector {
@@ -122,8 +124,8 @@ public class JaxRSCollector extends AbstractCollector {
     }
 
     @Override
-    protected Collection<PathVariableDescriptor> generatePathVars(MethodDoc methodDoc) {
-        Collection<PathVariableDescriptor> retVal = new ArrayList<PathVariableDescriptor>();
+    protected Collection<PathVar> generatePathVars(MethodDoc methodDoc) {
+        Collection<PathVar> retVal = new ArrayList<PathVar>();
 
         Tag[] tags = methodDoc.tags(PATHVAR_TAG);
         ParamTag[] paramTags = methodDoc.paramTags();
@@ -143,7 +145,7 @@ public class JaxRSCollector extends AbstractCollector {
                     if (text == null)
                         text = "";
 
-                    retVal.add(new PathVariableDescriptor(name, text, parameter.type()));
+                    retVal.add(new PathVar(name, text, parameter.type()));
                 }
             }
         }
@@ -152,8 +154,8 @@ public class JaxRSCollector extends AbstractCollector {
     }
 
     @Override
-    protected Collection<QueryParamDescriptor> generateQueryParams(MethodDoc methodDoc) {
-        Collection<QueryParamDescriptor> retVal = new ArrayList<QueryParamDescriptor> ();
+    protected Collection<QueryParam> generateQueryParams(MethodDoc methodDoc) {
+        Collection<QueryParam> retVal = new ArrayList<QueryParam> ();
 
         Tag[] tags = methodDoc.tags(QUERYPARAM_TAG);
         ParamTag[] paramTags = methodDoc.paramTags();
@@ -173,11 +175,34 @@ public class JaxRSCollector extends AbstractCollector {
                     if (text == null)
                         text = "";
 
-                    retVal.add(new QueryParamDescriptor(name, false, text, parameter.type()));
+                    retVal.add(new QueryParam(name, false, text, parameter.type()));
                 }
             }
         }
         return retVal;
+    }
+
+    @Override
+    protected RequestBody generateRequestBody(MethodDoc methodDoc) {
+        Tag[] tags = methodDoc.tags(REQUESTBODY_TAG);
+        ParamTag[] paramTags = methodDoc.paramTags();
+
+        for (Parameter parameter : methodDoc.parameters()) {
+
+            //TODO, need to double check this logic more.
+            //ignore anything in annotations and that starts with javax.  Then just accept the first one.
+            if (isEmpty(parameter.annotations()) && !parameter.typeName().startsWith("javax.")) {
+                //first check for special tag, then check regular param tag, finally default to empty string
+                String text = (isEmpty(tags) ? null : tags[0].text());
+                if (text == null)
+                    text = findParamText(paramTags, parameter.name());
+                if (text == null)
+                    text = "";
+
+                return new RequestBody(parameter.name(), text, parameter.type());
+            }
+        }
+        return null;
     }
 
     @Override
