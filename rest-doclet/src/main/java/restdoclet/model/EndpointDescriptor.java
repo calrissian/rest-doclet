@@ -15,6 +15,8 @@
  *******************************************************************************/
 package restdoclet.model;
 
+import com.sun.javadoc.Type;
+
 import java.util.Collection;
 
 public class EndpointDescriptor {
@@ -26,6 +28,7 @@ public class EndpointDescriptor {
     private final Collection<String> consumes;
     private final Collection<String> produces;
     private final String description;
+    private final Type type;
 
     public EndpointDescriptor(
             String path,
@@ -34,7 +37,8 @@ public class EndpointDescriptor {
             Collection<PathVariableDescriptor> pathVars,
             Collection<String> consumes,
             Collection<String> produces,
-            String description) {
+            String description,
+            Type type) {
 
         this.path = path;
         this.httpMethod = httpMethod;
@@ -43,6 +47,7 @@ public class EndpointDescriptor {
         this.consumes = consumes;
         this.produces = produces;
         this.description = description;
+        this.type = type;
     }
 
     public String getPath() {
@@ -71,6 +76,10 @@ public class EndpointDescriptor {
 
     public String getDescription() {
         return description;
+    }
+
+    public Type getType() {
+        return type;
     }
 
     @Override

@@ -18,9 +18,12 @@ package restdoclet;
 public class Configuration {
 
     private enum ConfigOption {
+        OUTPUT_FORMAT("o", "html"),
         TITLE("t", "REST Endpoint Descriptions"),
         FILENAME("f", "./index.html"),
-        STYLESHEET("stylesheet", "./stylesheet.css");
+        STYLESHEET("stylesheet", "./stylesheet.css"),
+        API_VERSION("version", null),
+        BASE_PATH("path", "/");
 
         private String option;
         private String defaultValue;
@@ -45,6 +48,10 @@ public class Configuration {
         this.options = options;
     }
 
+    public String getOutputFormat() {
+        return getOption(ConfigOption.OUTPUT_FORMAT);
+    }
+
     public String getDocumentTitle() {
         return getOption(ConfigOption.TITLE);
     }
@@ -55,6 +62,14 @@ public class Configuration {
 
     public String getStyleSheet() {
         return getOption(ConfigOption.STYLESHEET);
+    }
+
+    public String getApiVersion() {
+        return getOption(ConfigOption.API_VERSION);
+    }
+
+    public String getBasePath() {
+        return getOption(ConfigOption.BASE_PATH);
     }
 
     public boolean isdefaultStyleSheet() {

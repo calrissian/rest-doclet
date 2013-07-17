@@ -15,16 +15,20 @@
  *******************************************************************************/
 package restdoclet.model;
 
+import com.sun.javadoc.Type;
+
 public class QueryParamDescriptor {
 
     private final String name;
     private final boolean required;
     private final String description;
+    private final Type type;
 
-    public QueryParamDescriptor(String name, boolean required, String description) {
+    public QueryParamDescriptor(String name, boolean required, String description, Type type) {
         this.name = name;
         this.required = required;
         this.description = description;
+        this.type = type;
     }
 
     public String getName() {
@@ -37,6 +41,10 @@ public class QueryParamDescriptor {
 
     public String getDescription() {
         return description;
+    }
+
+    public Type getType() {
+        return type;
     }
 
     @Override

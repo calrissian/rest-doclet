@@ -52,7 +52,8 @@
                             </docletArtifact>
                             <useStandardDocletOptions>false</useStandardDocletOptions>
                             <destDir>restdoc</destDir>
-                            <additionalparam>-t "REST ${project.version} Documentation"</additionalparam>
+                            <additionalJOption>-J-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=5005</additionalJOption>
+                            <additionalparam>-t "REST ${project.version} Documentation" -o swagger -path "http://localhost:8080"</additionalparam>
                         </configuration>
                         <reports>
                             <report>javadoc</report>

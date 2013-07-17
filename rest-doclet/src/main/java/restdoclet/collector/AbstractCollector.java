@@ -27,9 +27,7 @@ import java.util.Collection;
 import java.util.LinkedHashSet;
 
 import static java.util.Collections.emptyList;
-import static restdoclet.util.CommonUtils.firstNonEmpty;
-import static restdoclet.util.CommonUtils.fixPath;
-import static restdoclet.util.CommonUtils.isEmpty;
+import static restdoclet.util.CommonUtils.*;
 import static restdoclet.util.TagUtils.*;
 
 public abstract class AbstractCollector implements Collector {
@@ -143,7 +141,8 @@ public abstract class AbstractCollector implements Collector {
                                 pathVars,
                                 consumes,
                                 produces,
-                                method.commentText()
+                                method.commentText(),
+                                method.returnType()
                         )
                 );
 

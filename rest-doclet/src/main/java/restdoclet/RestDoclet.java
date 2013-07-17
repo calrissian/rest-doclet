@@ -17,12 +17,15 @@ package restdoclet;
 
 
 import com.sun.javadoc.Doclet;
+import com.sun.javadoc.LanguageVersion;
 import com.sun.javadoc.RootDoc;
 import restdoclet.collector.Collector;
 import restdoclet.collector.jaxrs.JaxRSCollector;
 import restdoclet.collector.spring.SpringCollector;
 import restdoclet.model.ClassDescriptor;
 import restdoclet.writer.SimpleHtmlWriter;
+import restdoclet.writer.SwaggerWriter;
+import restdoclet.writer.Writer;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -52,7 +55,13 @@ public class RestDoclet extends Doclet {
         for (Collector collector : collectors)
             classDescriptors.addAll(collector.getDescriptors(root));
 
-        new SimpleHtmlWriter().write(classDescriptors, config);
+        Writer writer;
+        if (config.getOutputFormat().equals(SwaggerWriter.OUTPUT_OPTION_NAME))
+            writer = new SwaggerWriter();
+        else
+            writer = new SimpleHtmlWriter();
+
+        writer.write(classDescriptors, config);
 
         return true;
     }
@@ -66,4 +75,12 @@ public class RestDoclet extends Doclet {
         return getOptionLength(option);
     }
 
+    /**
+     * NOTE: Without this method present and returning LanguageVersion.JAVA_1_5,
+     *       Javadoc will not process generics because it assumes LanguageVersion.JAVA_1_1
+     * @return language version (hard coded to LanguageVersion.JAVA_1_5)
+     */
+    public static LanguageVersion languageVersion() {
+        return LanguageVersion.JAVA_1_5;
+    }
 }

@@ -112,7 +112,7 @@ public class SpringCollector extends AbstractCollector {
                     if (text == null)
                         text = "";
 
-                    retVal.add(new PathVariableDescriptor(name, text));
+                    retVal.add(new PathVariableDescriptor(name, text, parameter.type()));
                 }
             }
         }
@@ -149,7 +149,7 @@ public class SpringCollector extends AbstractCollector {
                     if (text == null)
                         text = "";
 
-                    retVal.add(new QueryParamDescriptor(name, required, text));
+                    retVal.add(new QueryParamDescriptor(name, required, text, parameter.type()));
                 }
             }
         }

@@ -15,14 +15,18 @@
  *******************************************************************************/
 package restdoclet.model;
 
+import com.sun.javadoc.Type;
+
 public class PathVariableDescriptor {
 
     private final String name;
     private final String description;
+    private final Type type;
 
-    public PathVariableDescriptor(String name, String description) {
+    public PathVariableDescriptor(String name, String description, Type type) {
         this.name = name;
         this.description = description;
+        this.type = type;
     }
 
     public String getName() {
@@ -31,6 +35,10 @@ public class PathVariableDescriptor {
 
     public String getDescription() {
         return description;
+    }
+
+    public Type getType() {
+        return type;
     }
 
     @Override

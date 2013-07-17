@@ -143,7 +143,7 @@ public class JaxRSCollector extends AbstractCollector {
                     if (text == null)
                         text = "";
 
-                    retVal.add(new PathVariableDescriptor(name, text));
+                    retVal.add(new PathVariableDescriptor(name, text, parameter.type()));
                 }
             }
         }
@@ -173,7 +173,7 @@ public class JaxRSCollector extends AbstractCollector {
                     if (text == null)
                         text = "";
 
-                    retVal.add(new QueryParamDescriptor(name, false, text));
+                    retVal.add(new QueryParamDescriptor(name, false, text, parameter.type()));
                 }
             }
         }
