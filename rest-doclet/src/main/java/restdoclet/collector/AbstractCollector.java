@@ -143,6 +143,7 @@ public abstract class AbstractCollector implements Collector {
                                 consumes,
                                 produces,
                                 method.commentText(),
+                                firstSentence(method),
                                 method.returnType()
                         )
                 );

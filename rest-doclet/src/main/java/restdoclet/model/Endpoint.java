@@ -28,6 +28,7 @@ public class Endpoint {
     private final RequestBody requestBody;
     private final Collection<String> consumes;
     private final Collection<String> produces;
+    private final String shortDescription;
     private final String description;
     private final Type type;
 
@@ -39,6 +40,7 @@ public class Endpoint {
             RequestBody requestBody,
             Collection<String> consumes,
             Collection<String> produces,
+            String shortDescription,
             String description,
             Type type) {
 
@@ -49,6 +51,7 @@ public class Endpoint {
         this.requestBody = requestBody;
         this.consumes = consumes;
         this.produces = produces;
+        this.shortDescription = shortDescription;
         this.description = description;
         this.type = type;
     }
@@ -81,6 +84,10 @@ public class Endpoint {
         return produces;
     }
 
+    public String getShortDescription() {
+        return shortDescription;
+    }
+
     public String getDescription() {
         return description;
     }
@@ -99,6 +106,7 @@ public class Endpoint {
                 ", requestBody=" + requestBody +
                 ", consumes=" + consumes +
                 ", produces=" + produces +
+                ", shortDescription='" + shortDescription + '\'' +
                 ", description='" + description + '\'' +
                 '}';
     }

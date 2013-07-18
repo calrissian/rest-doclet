@@ -179,8 +179,8 @@ public class SwaggerWriter implements Writer {
         generator.writeStartObject();
         generator.writeStringField("httpMethod", endpoint.getHttpMethod());
         generator.writeStringField("nickname", "nickname");
+        generator.writeStringField("notes", endpoint.getShortDescription());
         generator.writeStringField("summary", endpoint.getDescription());
-        generator.writeStringField("notes", endpoint.getDescription());
         if (returnType != null)
             generator.writeStringField("responseClass", returnType);
 

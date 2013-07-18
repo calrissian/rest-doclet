@@ -15,6 +15,7 @@
  *******************************************************************************/
 package restdoclet.util;
 
+import com.sun.javadoc.Doc;
 import com.sun.javadoc.Tag;
 
 
@@ -35,4 +36,14 @@ public class TagUtils {
         return null;
     }
 
+    public static String firstSentence(Doc doc) {
+        Tag[] tags = doc.firstSentenceTags();
+        StringBuilder sb = new StringBuilder();
+        if (!CommonUtils.isEmpty(tags)) {
+            for (Tag tag : tags)
+                sb.append(tag.text());
+        }
+
+        return sb.toString();
+    }
 }
