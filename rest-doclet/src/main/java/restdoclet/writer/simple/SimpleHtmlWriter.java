@@ -136,8 +136,21 @@ public class SimpleHtmlWriter implements restdoclet.writer.Writer {
                         out.println("</table>");
                     }
 
+                    if (endpoint.getRequestBody() != null &&
+                            endpoint.getRequestBody().getDescription() != null &&
+                            !endpoint.getRequestBody().getDescription().isEmpty()) {
+
+                        out.println("<div class=\"info_title\">Request Body</div>");
+                        out.println("<table width=\"100%\" class=\"list\">");
+                        out.println("<tr>");
+                        out.println("<td class=\"code_format\">" + endpoint.getRequestBody().getName() + "</td>");
+                        out.println("<td class=\"descr_format\">" + endpoint.getRequestBody().getDescription() + "</td>");
+                        out.println("</tr>");
+                        out.println("</table>");
+                    }
+
                     if (!isEmpty(endpoint.getConsumes())) {
-                        out.println("<div class=\"info_title\">Accepts</div>");
+                        out.println("<div class=\"info_title\">Consumes</div>");
                         out.println("<table width=\"100%\" class=\"list\">");
                         for (String acceptType : endpoint.getConsumes()) {
                             out.println("<tr>");
