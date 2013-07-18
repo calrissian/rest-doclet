@@ -2,12 +2,13 @@ package restdoclet.writer.swagger;
 
 
 import com.sun.javadoc.ClassDoc;
+import com.sun.javadoc.FieldDoc;
 import com.sun.javadoc.ParameterizedType;
 import com.sun.javadoc.Type;
 
-import java.util.Date;
-import java.util.Set;
+import java.util.*;
 
+import static java.util.Collections.emptyList;
 import static restdoclet.util.CommonUtils.isEmpty;
 
 class TypeUtils {
@@ -67,8 +68,9 @@ class TypeUtils {
 
         String name = type.qualifiedTypeName();
 
-        if (name.equals(Byte.class.getName()))
-            return "byte";
+        //Check the java.lang classes
+        if (name.equals(String.class.getName()))
+            return "string";
 
         if (name.equals(Boolean.class.getName()))
             return "boolean";
@@ -85,14 +87,33 @@ class TypeUtils {
         if (name.equals(Double.class.getName()))
             return "double";
 
-        if (name.equals(String.class.getName()))
-            return "string";
+        if (name.equals(Byte.class.getName()))
+            return "byte";
 
         if (name.equals(Date.class.getName()))
             return "Date";
 
+        //Process enums as strings.
+        if (!isEmpty(type.asClassDoc().enumConstants()))
+            return "string";
+
         //TODO look into supporting models.
         return "Object";
+    }
+
+    public static Collection<String> allowableValues(Type type) {
+        if (type == null || type.asClassDoc() == null)
+            return emptyList();
+
+        FieldDoc[] fields = type.asClassDoc().enumConstants();
+        if (isEmpty(fields))
+            return emptyList();
+
+        Collection<String> values = new ArrayList<String>(fields.length);
+        for (FieldDoc field : fields)
+            values.add(field.name());
+
+        return values;
     }
 
     private static <T> boolean isType(ClassDoc classDoc, Class<T> targetClazz) {

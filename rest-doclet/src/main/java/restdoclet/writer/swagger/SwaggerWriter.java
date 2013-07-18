@@ -3,6 +3,7 @@ package restdoclet.writer.swagger;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.sun.javadoc.Type;
 import restdoclet.Configuration;
 import restdoclet.model.ClassDescriptor;
 import restdoclet.model.Endpoint;
@@ -179,6 +180,9 @@ public class SwaggerWriter implements Writer {
             generator.writeStringField("dataType", basicType(pathVar.getType()));
             generator.writeBooleanField("required", true);
             generator.writeBooleanField("allowMultiple", false);
+
+            writeAllowableValues(pathVar.getType(), generator);
+
             generator.writeEndObject();
         }
         for (QueryParam queryParam : endpoint.getQueryParams()) {
@@ -193,6 +197,9 @@ public class SwaggerWriter implements Writer {
             generator.writeStringField("dataType", type);
             generator.writeBooleanField("required", queryParam.isRequired());
             generator.writeBooleanField("allowMultiple", container);
+
+            writeAllowableValues(queryParam.getType(), generator);
+
             generator.writeEndObject();
         }
         if (endpoint.getRequestBody() != null) {
@@ -203,10 +210,28 @@ public class SwaggerWriter implements Writer {
             generator.writeStringField("dataType", dataType(endpoint.getRequestBody().getType()));
             generator.writeBooleanField("required", true);
             generator.writeBooleanField("allowMultiple", false);
+
+            writeAllowableValues(endpoint.getRequestBody().getType(), generator);
+
             generator.writeEndObject();
         }
         generator.writeEndArray();
         generator.writeEndObject();
+    }
+
+    private static void writeAllowableValues(Type type, JsonGenerator generator) throws IOException {
+
+        Collection<String> values = allowableValues(type);
+        if (!isEmpty(values)) {
+            generator.writeObjectFieldStart("allowableValues");
+            generator.writeStringField("valueType" , "List");
+            generator.writeArrayFieldStart("values");
+            for (String field : values) {
+                generator.writeString(field);
+            }
+            generator.writeEndArray();
+            generator.writeEndObject();
+        }
     }
 
     private static String getDescription(Collection<ClassDescriptor> descriptors) {
