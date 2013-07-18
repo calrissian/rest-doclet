@@ -20,7 +20,6 @@ import restdoclet.model.ClassDescriptor;
 import restdoclet.model.Endpoint;
 import restdoclet.model.PathVar;
 import restdoclet.model.QueryParam;
-import restdoclet.writer.*;
 
 import java.io.*;
 import java.util.Collection;
@@ -28,7 +27,7 @@ import java.util.Collection;
 import static restdoclet.util.CommonUtils.*;
 
 public class SimpleHtmlWriter implements restdoclet.writer.Writer {
-
+    public static final String OUTPUT_OPTION_NAME = "legacy";
     private static final String DEFAULT_STYLESHEET = "default-stylesheet.css";
 
     @Override

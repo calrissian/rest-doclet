@@ -104,161 +104,161 @@ public class SwaggerWriter implements Writer {
 
     private static void writeResource(Map<String, Collection<Endpoint>> resources, Configuration config) {
 
-        JsonGenerator generator = null;
+        JsonGenerator gen = null;
 
         try {
-            generator = mapper.getFactory().createGenerator(new FileOutputStream(RESOURCE_DOC)).useDefaultPrettyPrinter();
-            generator.writeStartObject();
-            generator.writeStringField("swaggerVersion", SWAGGER_VERSION);
+            gen = mapper.getFactory().createGenerator(new FileOutputStream(RESOURCE_DOC)).useDefaultPrettyPrinter();
+            gen.writeStartObject();
+            gen.writeStringField("swaggerVersion", SWAGGER_VERSION);
             if (config.getApiVersion() != null)
-                generator.writeStringField("apiVersion", config.getApiVersion());
+                gen.writeStringField("apiVersion", config.getApiVersion());
 
-            generator.writeArrayFieldStart("apis");
+            gen.writeArrayFieldStart("apis");
             for (Entry<String, Collection<Endpoint>> entry : resources.entrySet()) {
-                generator.writeStartObject();
-                generator.writeStringField("path", "/../" + API_DOC_DIR + entry.getKey());
-                generator.writeStringField("description", "");
-                generator.writeEndObject();
+                gen.writeStartObject();
+                gen.writeStringField("path", "/../" + API_DOC_DIR + entry.getKey());
+                gen.writeStringField("description", "");
+                gen.writeEndObject();
 
                 writeApi(entry.getKey(), entry.getValue(), config);
             }
-            generator.writeEndArray();
-            generator.writeObjectFieldStart("info");
-            generator.writeStringField("title", config.getDocumentTitle());
-            generator.writeEndObject();
-            generator.writeEndObject();
+            gen.writeEndArray();
+            gen.writeObjectFieldStart("info");
+            gen.writeStringField("title", config.getDocumentTitle());
+            gen.writeEndObject();
+            gen.writeEndObject();
 
 
         } catch (IOException e) {
             e.printStackTrace();
         } finally {
-            closeQuietly(generator);
+            closeQuietly(gen);
         }
     }
 
     private static void writeApi(String resource, Collection<Endpoint> endpoints, Configuration config) {
-        JsonGenerator generator = null;
+        JsonGenerator gen = null;
         Map<String, Collection<Endpoint>> pathGroups = groupPaths(endpoints);
 
         try {
             new File("./" + API_DOC_DIR + resource).getParentFile().mkdirs();
-            generator = mapper.getFactory().createGenerator(new FileOutputStream("./" + API_DOC_DIR + resource)).useDefaultPrettyPrinter();
-            generator.writeStartObject();
-            generator.writeStringField("swaggerVersion", SWAGGER_VERSION);
-            generator.writeStringField("basePath", config.getUrl());
-            generator.writeStringField("resourcePath", resource);
+            gen = mapper.getFactory().createGenerator(new FileOutputStream("./" + API_DOC_DIR + resource)).useDefaultPrettyPrinter();
+            gen.writeStartObject();
+            gen.writeStringField("swaggerVersion", SWAGGER_VERSION);
+            gen.writeStringField("basePath", config.getUrl());
+            gen.writeStringField("resourcePath", resource);
             if (config.getApiVersion() != null)
-                generator.writeStringField("apiVersion", config.getApiVersion());
+                gen.writeStringField("apiVersion", config.getApiVersion());
 
-            generator.writeArrayFieldStart("apis");
+            gen.writeArrayFieldStart("apis");
             for (Entry<String, Collection<Endpoint>> entry : pathGroups.entrySet()) {
-                generator.writeStartObject();
-                generator.writeStringField("path", entry.getKey());
-                generator.writeStringField("description", "");
-                generator.writeArrayFieldStart("operations");
+                gen.writeStartObject();
+                gen.writeStringField("path", entry.getKey());
+                gen.writeStringField("description", "");
+                gen.writeArrayFieldStart("operations");
                 for (Endpoint endpoint : entry.getValue()) {
-                    writeEndpoint(endpoint, generator);
+                    writeEndpoint(endpoint, gen);
                 }
-                generator.writeEndArray();
-                generator.writeEndObject();
+                gen.writeEndArray();
+                gen.writeEndObject();
             }
-            generator.writeEndArray();
-            generator.writeEndObject();
+            gen.writeEndArray();
+            gen.writeEndObject();
 
 
         } catch (IOException e) {
             e.printStackTrace();
         } finally {
-            closeQuietly(generator);
+            closeQuietly(gen);
         }
     }
 
-    private static void writeEndpoint(Endpoint endpoint, JsonGenerator generator) throws IOException {
+    private static void writeEndpoint(Endpoint endpoint, JsonGenerator gen) throws IOException {
         String returnType = dataType(endpoint.getType());
 
-        generator.writeStartObject();
-        generator.writeStringField("httpMethod", endpoint.getHttpMethod());
-        generator.writeStringField("nickname", "nickname");
-        generator.writeStringField("notes", endpoint.getShortDescription());
-        generator.writeStringField("summary", endpoint.getDescription());
+        gen.writeStartObject();
+        gen.writeStringField("httpMethod", endpoint.getHttpMethod());
+        gen.writeStringField("nickname", "nickname");
+        gen.writeStringField("notes", endpoint.getShortDescription());
+        gen.writeStringField("summary", endpoint.getDescription());
         if (returnType != null)
-            generator.writeStringField("responseClass", returnType);
+            gen.writeStringField("responseClass", returnType);
 
         if (!isEmpty(endpoint.getProduces())) {
-            generator.writeArrayFieldStart("produces");
+            gen.writeArrayFieldStart("produces");
             for (String produces : endpoint.getProduces())
-                generator.writeString(produces);
+                gen.writeString(produces);
 
-            generator.writeEndArray();
+            gen.writeEndArray();
         }
         if (!isEmpty(endpoint.getConsumes())) {
-            generator.writeArrayFieldStart("consumes");
+            gen.writeArrayFieldStart("consumes");
             for (String consumes : endpoint.getConsumes()) {
-                generator.writeString(consumes);
+                gen.writeString(consumes);
             }
-            generator.writeEndArray();
+            gen.writeEndArray();
         }
 
-        generator.writeArrayFieldStart("parameters");
+        gen.writeArrayFieldStart("parameters");
         for (PathVar pathVar : endpoint.getPathVars()) {
-            generator.writeStartObject();
-            generator.writeStringField("paramType", "path");
-            generator.writeStringField("name", pathVar.getName());
-            generator.writeStringField("description", pathVar.getDescription());
-            generator.writeStringField("dataType", basicType(pathVar.getType()));
-            generator.writeBooleanField("required", true);
-            generator.writeBooleanField("allowMultiple", false);
+            gen.writeStartObject();
+            gen.writeStringField("paramType", "path");
+            gen.writeStringField("name", pathVar.getName());
+            gen.writeStringField("description", pathVar.getDescription());
+            gen.writeStringField("dataType", basicType(pathVar.getType()));
+            gen.writeBooleanField("required", true);
+            gen.writeBooleanField("allowMultiple", false);
 
-            writeAllowableValues(pathVar.getType(), generator);
+            writeAllowableValues(pathVar.getType(), gen);
 
-            generator.writeEndObject();
+            gen.writeEndObject();
         }
         for (QueryParam queryParam : endpoint.getQueryParams()) {
             //If it is a container type then allow multiple but use the underlying type.
             boolean container = isContainer(queryParam.getType());
             String type = (container ? internalContainerType(queryParam.getType()) : basicType(queryParam.getType()));
 
-            generator.writeStartObject();
-            generator.writeStringField("paramType", "query");
-            generator.writeStringField("name", queryParam.getName());
-            generator.writeStringField("description", queryParam.getDescription());
-            generator.writeStringField("dataType", type);
-            generator.writeBooleanField("required", queryParam.isRequired());
-            generator.writeBooleanField("allowMultiple", container);
+            gen.writeStartObject();
+            gen.writeStringField("paramType", "query");
+            gen.writeStringField("name", queryParam.getName());
+            gen.writeStringField("description", queryParam.getDescription());
+            gen.writeStringField("dataType", type);
+            gen.writeBooleanField("required", queryParam.isRequired());
+            gen.writeBooleanField("allowMultiple", container);
 
-            writeAllowableValues(queryParam.getType(), generator);
+            writeAllowableValues(queryParam.getType(), gen);
 
-            generator.writeEndObject();
+            gen.writeEndObject();
         }
         if (endpoint.getRequestBody() != null) {
-            generator.writeStartObject();
-            generator.writeStringField("paramType", "body");
-            generator.writeStringField("name", endpoint.getRequestBody().getName());
-            generator.writeStringField("description", endpoint.getRequestBody().getDescription());
-            generator.writeStringField("dataType", dataType(endpoint.getRequestBody().getType()));
-            generator.writeBooleanField("required", true);
-            generator.writeBooleanField("allowMultiple", false);
+            gen.writeStartObject();
+            gen.writeStringField("paramType", "body");
+            gen.writeStringField("name", endpoint.getRequestBody().getName());
+            gen.writeStringField("description", endpoint.getRequestBody().getDescription());
+            gen.writeStringField("dataType", dataType(endpoint.getRequestBody().getType()));
+            gen.writeBooleanField("required", true);
+            gen.writeBooleanField("allowMultiple", false);
 
-            writeAllowableValues(endpoint.getRequestBody().getType(), generator);
+            writeAllowableValues(endpoint.getRequestBody().getType(), gen);
 
-            generator.writeEndObject();
+            gen.writeEndObject();
         }
-        generator.writeEndArray();
-        generator.writeEndObject();
+        gen.writeEndArray();
+        gen.writeEndObject();
     }
 
-    private static void writeAllowableValues(Type type, JsonGenerator generator) throws IOException {
+    private static void writeAllowableValues(Type type, JsonGenerator gen) throws IOException {
 
         Collection<String> values = allowableValues(type);
         if (!isEmpty(values)) {
-            generator.writeObjectFieldStart("allowableValues");
-            generator.writeStringField("valueType" , "List");
-            generator.writeArrayFieldStart("values");
+            gen.writeObjectFieldStart("allowableValues");
+            gen.writeStringField("valueType", "List");
+            gen.writeArrayFieldStart("values");
             for (String field : values) {
-                generator.writeString(field);
+                gen.writeString(field);
             }
-            generator.writeEndArray();
-            generator.writeEndObject();
+            gen.writeEndArray();
+            gen.writeEndObject();
         }
     }
 

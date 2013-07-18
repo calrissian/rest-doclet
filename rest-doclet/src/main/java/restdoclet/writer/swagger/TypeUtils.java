@@ -6,7 +6,10 @@ import com.sun.javadoc.FieldDoc;
 import com.sun.javadoc.ParameterizedType;
 import com.sun.javadoc.Type;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Date;
+import java.util.Set;
 
 import static java.util.Collections.emptyList;
 import static restdoclet.util.CommonUtils.isEmpty;

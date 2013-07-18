@@ -16,7 +16,10 @@
 package restdoclet.collector;
 
 
-import com.sun.javadoc.*;
+import com.sun.javadoc.ClassDoc;
+import com.sun.javadoc.MethodDoc;
+import com.sun.javadoc.ProgramElementDoc;
+import com.sun.javadoc.RootDoc;
 import restdoclet.model.*;
 
 import java.util.ArrayList;
