@@ -69,6 +69,8 @@ public class CommonUtils {
     }
 
     public static String fixPath(String path) {
+        if (isEmpty(path))
+            return "/";
 
         //remove duplicates path seperators
         int len = 0;

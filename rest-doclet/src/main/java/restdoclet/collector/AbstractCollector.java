@@ -67,8 +67,8 @@ public abstract class AbstractCollector implements Collector {
         //If the ignore tag is present or this type of class should be ignored then simply ignore this class
         if (!isEmpty(classDoc.tags(IGNORE_TAG)) || shouldIgnoreClass(classDoc))
             return null;
-
-        Collection<Endpoint> endpoints = getAllEndpoints(getContextPath(classDoc), classDoc, getEndpointMapping(classDoc));
+        String contextPath = getContextPath(classDoc);
+        Collection<Endpoint> endpoints = getAllEndpoints(contextPath, classDoc, getEndpointMapping(classDoc));
 
         //If there are no endpoints then no use in providing documentation.
         if (isEmpty(endpoints))
@@ -79,6 +79,7 @@ public abstract class AbstractCollector implements Collector {
 
         return new ClassDescriptor(
                 (name == null ? "" : name),
+                (contextPath == null ? "" : contextPath),
                 endpoints,
                 (description == null ? "" : description)
         );

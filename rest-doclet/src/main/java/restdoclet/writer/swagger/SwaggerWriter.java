@@ -33,18 +33,21 @@ public class SwaggerWriter implements Writer {
     @Override
     public void write(Collection<ClassDescriptor> classDescriptors, Configuration config) {
 
-        Map<String, Collection<ClassDescriptor>> apis = new LinkedHashMap<String, Collection<ClassDescriptor>>();
+        Map<String, Collection<Endpoint>> resources = new LinkedHashMap<String, Collection<Endpoint>>();
         for (ClassDescriptor classDescriptor : classDescriptors) {
-            String api = longestCommonPrefix(classDescriptor);
-            if (apis.containsKey(api)) {
-                apis.get(api).add(classDescriptor);
-            } else {
-                Collection<ClassDescriptor> tmp = new ArrayList<ClassDescriptor>();
-                tmp.add(classDescriptor);
-                apis.put(api, tmp);
+            for (Endpoint endpoint : classDescriptor.getEndpoints()) {
+                String resourceName = getResource(classDescriptor.getContextPath(), endpoint);
+                if (resources.containsKey(resourceName)) {
+                    resources.get(resourceName).add(endpoint);
+                } else {
+                    Collection<Endpoint> tmp = new ArrayList<Endpoint>();
+                    tmp.add(endpoint);
+                    resources.put(resourceName, tmp);
+                }
             }
         }
-        writeResource(apis, config);
+
+        writeResource(resources, config);
         copySwagger();
     }
 
@@ -74,7 +77,7 @@ public class SwaggerWriter implements Writer {
 
     }
 
-    private static void writeResource(Map<String, Collection<ClassDescriptor>> apis, Configuration config) {
+    private static void writeResource(Map<String, Collection<Endpoint>> resources, Configuration config) {
 
         JsonGenerator generator = null;
 
@@ -86,10 +89,10 @@ public class SwaggerWriter implements Writer {
                 generator.writeStringField("apiVersion", config.getApiVersion());
 
             generator.writeArrayFieldStart("apis");
-            for (Entry<String, Collection<ClassDescriptor>> entry : apis.entrySet()) {
+            for (Entry<String, Collection<Endpoint>> entry : resources.entrySet()) {
                 generator.writeStartObject();
                 generator.writeStringField("path", "/../" + API_DOC_DIR + entry.getKey());
-                generator.writeStringField("description", getDescription(entry.getValue()));
+                generator.writeStringField("description", "");
                 generator.writeEndObject();
 
                 writeApi(entry.getKey(), entry.getValue(), config);
@@ -108,17 +111,17 @@ public class SwaggerWriter implements Writer {
         }
     }
 
-    private static void writeApi(String path, Collection<ClassDescriptor> descriptors, Configuration config) {
+    private static void writeApi(String resource, Collection<Endpoint> endpoints, Configuration config) {
         JsonGenerator generator = null;
-        Map<String, Collection<Endpoint>> pathGroups = groupPaths(descriptors);
+        Map<String, Collection<Endpoint>> pathGroups = groupPaths(endpoints);
 
         try {
-            new File("./" + API_DOC_DIR + path).getParentFile().mkdirs();
-            generator = mapper.getFactory().createGenerator(new FileOutputStream("./" + API_DOC_DIR + path)).useDefaultPrettyPrinter();
+            new File("./" + API_DOC_DIR + resource).getParentFile().mkdirs();
+            generator = mapper.getFactory().createGenerator(new FileOutputStream("./" + API_DOC_DIR + resource)).useDefaultPrettyPrinter();
             generator.writeStartObject();
             generator.writeStringField("swaggerVersion", SWAGGER_VERSION);
             generator.writeStringField("basePath", config.getBaseUrl());
-            generator.writeStringField("resourcePath", path);
+            generator.writeStringField("resourcePath", resource);
             if (config.getApiVersion() != null)
                 generator.writeStringField("apiVersion", config.getApiVersion());
 
@@ -234,53 +237,42 @@ public class SwaggerWriter implements Writer {
         }
     }
 
-    private static String getDescription(Collection<ClassDescriptor> descriptors) {
-        StringBuilder sb = new StringBuilder();
-        for (ClassDescriptor descriptor : descriptors)
-            sb.append(descriptor.getDescription()).append(" ");
-
-        return sb.toString().trim();
-    }
-
-    private static String longestCommonPrefix(ClassDescriptor classDescriptor) {
-
-        if (isEmpty(classDescriptor.getEndpoints()))
-            return "/";
-
-        List<String> paths = new ArrayList<String>(classDescriptor.getEndpoints().size());
-        for (Endpoint endpoint : classDescriptor.getEndpoints())
-            paths.add(endpoint.getPath());
-
-        Collections.sort(paths);
-        String longest = paths.get(0);
-
-        for (int i = 1;i< paths.size();i++) {
-            for (int j = 0;j< longest.length();j++) {
-                if (paths.get(i).charAt(j) != longest.charAt(j)) {
-                    longest = longest.substring(0, j - 1);
-                }
-            }
-        }
-
-        return fixPath(longest);
-    }
-
-    private static Map<String, Collection<Endpoint>> groupPaths (Collection<ClassDescriptor> classDescriptors) {
+    private static Map<String, Collection<Endpoint>> groupPaths (Collection<Endpoint> endpoints) {
         Map<String, Collection<Endpoint>> paths = new LinkedHashMap<String, Collection<Endpoint>>();
-        for (ClassDescriptor classDescriptor : classDescriptors) {
-            for (Endpoint endpoint : classDescriptor.getEndpoints()) {
-                if (paths.containsKey(endpoint.getPath())) {
-                    paths.get(endpoint.getPath()).add(endpoint);
-                } else {
-                    Collection<Endpoint> tmp = new ArrayList<Endpoint>();
-                    tmp.add(endpoint);
-                    paths.put(endpoint.getPath(), tmp);
-                }
+        for (Endpoint endpoint : endpoints) {
+            if (paths.containsKey(endpoint.getPath())) {
+                paths.get(endpoint.getPath()).add(endpoint);
+            } else {
+                Collection<Endpoint> tmp = new ArrayList<Endpoint>();
+                tmp.add(endpoint);
+                paths.put(endpoint.getPath(), tmp);
             }
         }
 
         return paths;
     }
 
+    /**
+     * Will get the first path segment that follows the context path.  Will return the partial path as the resource id.
+     */
+    private static String getResource(String contextPath, Endpoint endpoint) {
+        if (endpoint == null || isEmpty(endpoint.getPath()))
+            return "/";
 
+        //Shouldn't need to do this, but being safe.
+        String tmp = fixPath(endpoint.getPath());
+
+
+        //First normalize the path then, if not part of the path then simply ignore it.
+        contextPath = fixPath(contextPath);
+        contextPath = (!tmp.startsWith(contextPath) ? "" : contextPath);
+
+        //remove the context path for evaluation
+        tmp = tmp.substring(contextPath.length());
+
+        if (tmp.indexOf("/", 1) > 0)
+            tmp = tmp.substring(0, tmp.indexOf("/", 1));
+
+        return contextPath + tmp;
+    }
 }
