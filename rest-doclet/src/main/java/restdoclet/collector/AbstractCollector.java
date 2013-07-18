@@ -158,9 +158,9 @@ public abstract class AbstractCollector implements Collector {
      * @return
      */
     protected String getContextPath(ClassDoc classDoc) {
-        if(!isEmpty(classDoc.tags(CONTEXT_TAG))) {
+        if(!isEmpty(classDoc.tags(CONTEXT_TAG)))
             return classDoc.tags(CONTEXT_TAG)[0].text();
-        }
+
         return "";
     }
 
@@ -173,12 +173,10 @@ public abstract class AbstractCollector implements Collector {
      * @return
      */
     protected String getClassName(ClassDoc classDoc) {
-        Tag[] tags = classDoc.tags(NAME_TAG);
-        String name;
-        if (tags != null && tags.length > 0)
-            return tags[0].text();
-        else
-            return classDoc.typeName();
+        if (!isEmpty(classDoc.tags(NAME_TAG)))
+            return classDoc.tags(NAME_TAG)[0].text();
+
+        return classDoc.typeName();
     }
 
     /**

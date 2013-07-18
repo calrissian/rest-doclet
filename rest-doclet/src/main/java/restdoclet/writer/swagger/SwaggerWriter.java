@@ -117,7 +117,7 @@ public class SwaggerWriter implements Writer {
             generator = mapper.getFactory().createGenerator(new FileOutputStream("./" + API_DOC_DIR + path)).useDefaultPrettyPrinter();
             generator.writeStartObject();
             generator.writeStringField("swaggerVersion", SWAGGER_VERSION);
-            generator.writeStringField("basePath", config.getBasePath());
+            generator.writeStringField("basePath", config.getBaseUrl());
             generator.writeStringField("resourcePath", path);
             if (config.getApiVersion() != null)
                 generator.writeStringField("apiVersion", config.getApiVersion());

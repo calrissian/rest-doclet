@@ -36,6 +36,10 @@ public class CommonUtils {
         return items == null || items.isEmpty();
     }
 
+    public static boolean isEmpty(String value) {
+        return value == null || value.isEmpty();
+    }
+
     public static void closeQuietly(Closeable closeable) {
 
         if (closeable == null)

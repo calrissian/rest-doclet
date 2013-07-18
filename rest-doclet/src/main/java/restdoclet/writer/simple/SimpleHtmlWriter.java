@@ -137,9 +137,7 @@ public class SimpleHtmlWriter implements restdoclet.writer.Writer {
                     }
 
                     if (endpoint.getRequestBody() != null &&
-                            endpoint.getRequestBody().getDescription() != null &&
-                            !endpoint.getRequestBody().getDescription().isEmpty()) {
-
+                            !isEmpty(endpoint.getRequestBody().getDescription())) {
                         out.println("<div class=\"info_title\">Request Body</div>");
                         out.println("<table width=\"100%\" class=\"list\">");
                         out.println("<tr>");
