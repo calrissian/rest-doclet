@@ -23,7 +23,7 @@ public class Configuration {
         FILENAME("f", "./index.html"),
         STYLESHEET("stylesheet", "./stylesheet.css"),
         API_VERSION("version", null),
-        BASE_URL("url", "/");
+        URL("url", "/");
 
         private String option;
         private String defaultValue;
@@ -68,8 +68,12 @@ public class Configuration {
         return getOption(ConfigOption.API_VERSION);
     }
 
-    public String getBaseUrl() {
-        return getOption(ConfigOption.BASE_URL);
+    public String getUrl() {
+        return getOption(ConfigOption.URL);
+    }
+
+    public boolean hasUrl() {
+        return getOption(ConfigOption.URL.getOption(), null) != null;
     }
 
     public boolean isdefaultStyleSheet() {

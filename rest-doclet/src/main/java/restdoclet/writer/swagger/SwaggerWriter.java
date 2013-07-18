@@ -11,10 +11,11 @@ import restdoclet.model.PathVar;
 import restdoclet.model.QueryParam;
 import restdoclet.writer.Writer;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.util.*;
+import java.io.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -24,7 +25,10 @@ import static restdoclet.writer.swagger.TypeUtils.*;
 
 public class SwaggerWriter implements Writer {
     public static final String OUTPUT_OPTION_NAME = "swagger";
-    private static final String SWAGGER_UI_ARTIFACT = "swagger-ui.zip";
+
+    private static final String SWAGGER_DEFAULT_HTML = "swagger/index.html";
+    private static final String SWAGGER_CALLABLE_HTML = "swagger/index-callable.html";
+    private static final String SWAGGER_UI_ARTIFACT = "swagger/swagger-ui.zip";
     private static final String SWAGGER_VERSION = "1.2";
     private static final String RESOURCE_DOC = "./api-docs";
     private static final String API_DOC_DIR = "apis";
@@ -48,11 +52,32 @@ public class SwaggerWriter implements Writer {
         }
 
         writeResource(resources, config);
+        copyIndex(config);
         copySwagger();
     }
 
-    private static void copySwagger() {
+    private static void copyIndex(Configuration config) {
+        InputStream in = null;
+        OutputStream out = null;
+        try {
 
+            if (config.hasUrl())
+                in = Thread.currentThread().getContextClassLoader().getResourceAsStream(SWAGGER_CALLABLE_HTML);
+            else
+                in = Thread.currentThread().getContextClassLoader().getResourceAsStream(SWAGGER_DEFAULT_HTML);
+
+            out = new FileOutputStream(new File(config.getOutputFileName()));
+            copy(in, out);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            closeQuietly(in);
+            closeQuietly(out);
+        }
+    }
+
+    private static void copySwagger() {
         ZipInputStream swaggerZip = null;
         FileOutputStream out = null;
         try{
@@ -120,7 +145,7 @@ public class SwaggerWriter implements Writer {
             generator = mapper.getFactory().createGenerator(new FileOutputStream("./" + API_DOC_DIR + resource)).useDefaultPrettyPrinter();
             generator.writeStartObject();
             generator.writeStringField("swaggerVersion", SWAGGER_VERSION);
-            generator.writeStringField("basePath", config.getBaseUrl());
+            generator.writeStringField("basePath", config.getUrl());
             generator.writeStringField("resourcePath", resource);
             if (config.getApiVersion() != null)
                 generator.writeStringField("apiVersion", config.getApiVersion());
