@@ -50,7 +50,7 @@ public class SwaggerWriter implements Writer {
     private static ObjectMapper mapper = new ObjectMapper();
 
     @Override
-    public void write(Collection<ClassDescriptor> classDescriptors, Configuration config) {
+    public void write(Collection<ClassDescriptor> classDescriptors, Configuration config) throws IOException {
 
         Map<String, Collection<Endpoint>> resources = new LinkedHashMap<String, Collection<Endpoint>>();
         for (ClassDescriptor classDescriptor : classDescriptors) {
@@ -71,7 +71,7 @@ public class SwaggerWriter implements Writer {
         copySwagger();
     }
 
-    private static void copyIndex(Configuration config) {
+    private static void copyIndex(Configuration config) throws IOException {
         InputStream in = null;
         OutputStream out = null;
         try {
@@ -84,15 +84,12 @@ public class SwaggerWriter implements Writer {
             out = new FileOutputStream(new File(".", "index.html"));
             copy(in, out);
 
-        } catch (Exception e) {
-            e.printStackTrace();
         } finally {
-            closeQuietly(in);
-            closeQuietly(out);
+            close(in, out);
         }
     }
 
-    private static void copySwagger() {
+    private static void copySwagger() throws IOException {
         ZipInputStream swaggerZip = null;
         FileOutputStream out = null;
         try{
@@ -108,16 +105,13 @@ public class SwaggerWriter implements Writer {
                     copy(swaggerZip, new FileOutputStream(swaggerFile));
                 }
             }
-        } catch (IOException e) {
-            e.printStackTrace();
         } finally {
-            closeQuietly(swaggerZip);
-            closeQuietly(out);
+            close(swaggerZip, out);
         }
 
     }
 
-    private static void writeResource(Map<String, Collection<Endpoint>> resources, Configuration config) {
+    private static void writeResource(Map<String, Collection<Endpoint>> resources, Configuration config) throws IOException {
 
         JsonGenerator gen = null;
 
@@ -144,14 +138,12 @@ public class SwaggerWriter implements Writer {
             gen.writeEndObject();
 
 
-        } catch (IOException e) {
-            e.printStackTrace();
         } finally {
-            closeQuietly(gen);
+            close(gen);
         }
     }
 
-    private static void writeApi(String resource, Collection<Endpoint> endpoints, Configuration config) {
+    private static void writeApi(String resource, Collection<Endpoint> endpoints, Configuration config) throws IOException {
         JsonGenerator gen = null;
         Map<String, Collection<Endpoint>> pathGroups = groupPaths(endpoints);
 
@@ -182,10 +174,8 @@ public class SwaggerWriter implements Writer {
             gen.writeEndObject();
 
 
-        } catch (IOException e) {
-            e.printStackTrace();
         } finally {
-            closeQuietly(gen);
+            close(gen);
         }
     }
 

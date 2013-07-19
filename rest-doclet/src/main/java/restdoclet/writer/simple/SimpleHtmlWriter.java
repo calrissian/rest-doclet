@@ -31,7 +31,7 @@ public class SimpleHtmlWriter implements restdoclet.writer.Writer {
     private static final String DEFAULT_STYLESHEET = "default-stylesheet.css";
 
     @Override
-    public void write(Collection<ClassDescriptor> classDescriptors, Configuration config) {
+    public void write(Collection<ClassDescriptor> classDescriptors, Configuration config) throws IOException {
 
         if (config.isdefaultStyleSheet())
             generateStyleSheet(config);
@@ -39,7 +39,7 @@ public class SimpleHtmlWriter implements restdoclet.writer.Writer {
         writeHtml(classDescriptors, config);
     }
 
-    private static void generateStyleSheet(Configuration config) {
+    private static void generateStyleSheet(Configuration config) throws IOException {
         InputStream in = null;
         OutputStream out = null;
         try {
@@ -49,15 +49,12 @@ public class SimpleHtmlWriter implements restdoclet.writer.Writer {
 
             copy(in, out);
 
-        } catch (Exception e) {
-            e.printStackTrace();
         } finally {
-            closeQuietly(in);
-            closeQuietly(out);
+            close(in, out);
         }
     }
 
-    private static void writeHtml(Collection<ClassDescriptor> classDescriptors, Configuration config) {
+    private static void writeHtml(Collection<ClassDescriptor> classDescriptors, Configuration config) throws IOException {
 
         PrintWriter out = null;
 
@@ -188,7 +185,7 @@ public class SimpleHtmlWriter implements restdoclet.writer.Writer {
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         } finally {
-            closeQuietly(out);
+            close(out);
         }
     }
 

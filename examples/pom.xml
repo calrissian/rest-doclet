@@ -53,7 +53,7 @@
                             <useStandardDocletOptions>false</useStandardDocletOptions>
                             <destDir>restdoc</destDir>
                             <!--<additionalJOption>-J-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=5005</additionalJOption>-->
-                            <additionalparam>-t "REST ${project.version} Documentation"</additionalparam>
+                            <additionalparam>-t "REST ${project.version} Documentation" -o swagger -url "http://localhost:8080"</additionalparam>
                         </configuration>
                         <reports>
                             <report>javadoc</report>

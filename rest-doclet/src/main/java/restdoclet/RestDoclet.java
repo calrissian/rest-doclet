@@ -27,6 +27,7 @@ import restdoclet.writer.Writer;
 import restdoclet.writer.simple.SimpleHtmlWriter;
 import restdoclet.writer.swagger.SwaggerWriter;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -61,9 +62,14 @@ public class RestDoclet extends Doclet {
         else
             writer = new SimpleHtmlWriter();
 
-        writer.write(classDescriptors, config);
 
-        return true;
+        try {
+            writer.write(classDescriptors, config);
+            return true;
+        } catch (IOException e) {
+            e.printStackTrace();
+            return false;
+        }
     }
 
     /**

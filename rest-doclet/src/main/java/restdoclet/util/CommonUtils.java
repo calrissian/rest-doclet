@@ -40,14 +40,24 @@ public class CommonUtils {
         return value == null || value.isEmpty();
     }
 
-    public static void closeQuietly(Closeable closeable) {
-
-        if (closeable == null)
+    public static void close(Closeable... closeables) throws IOException{
+        if (isEmpty(closeables))
             return;
 
-        try {
-            closeable.close();
-        } catch (IOException e) { /* do nothing */ }
+        Exception first = null;
+        for (Closeable closeable : closeables) {
+            if (closeable == null)
+                continue;
+
+            try {
+                closeable.close();
+            } catch (Exception e) {
+                first = (first == null ? e : first);
+            }
+        }
+
+        if (first != null)
+            throw (first instanceof IOException ? (IOException)first : new IOException(first));
 
     }
 
