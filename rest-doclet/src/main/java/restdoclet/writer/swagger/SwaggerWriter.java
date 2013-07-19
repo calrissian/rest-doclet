@@ -66,7 +66,7 @@ public class SwaggerWriter implements Writer {
             else
                 in = Thread.currentThread().getContextClassLoader().getResourceAsStream(SWAGGER_DEFAULT_HTML);
 
-            out = new FileOutputStream(new File(config.getOutputFileName()));
+            out = new FileOutputStream(new File(".", "index.html"));
             copy(in, out);
 
         } catch (Exception e) {
@@ -84,7 +84,7 @@ public class SwaggerWriter implements Writer {
             swaggerZip = new ZipInputStream(Thread.currentThread().getContextClassLoader().getResourceAsStream(SWAGGER_UI_ARTIFACT));
             ZipEntry entry;
             while ((entry = swaggerZip.getNextEntry()) != null) {
-                final File swaggerFile = new File("./", entry.getName());
+                final File swaggerFile = new File(".", entry.getName());
                 if (entry.isDirectory()) {
                     if (!swaggerFile.isDirectory() && !swaggerFile.mkdirs()) {
                         throw new RuntimeException("Unable to create directory: " + swaggerFile);
@@ -141,8 +141,9 @@ public class SwaggerWriter implements Writer {
         Map<String, Collection<Endpoint>> pathGroups = groupPaths(endpoints);
 
         try {
-            new File("./" + API_DOC_DIR + resource).getParentFile().mkdirs();
-            gen = mapper.getFactory().createGenerator(new FileOutputStream("./" + API_DOC_DIR + resource)).useDefaultPrettyPrinter();
+            File apiFile = new File("./" + API_DOC_DIR , resource);
+            apiFile.getParentFile().mkdirs();
+            gen = mapper.getFactory().createGenerator(new FileOutputStream(apiFile)).useDefaultPrettyPrinter();
             gen.writeStartObject();
             gen.writeStringField("swaggerVersion", SWAGGER_VERSION);
             gen.writeStringField("basePath", config.getUrl());

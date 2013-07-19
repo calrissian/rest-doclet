@@ -15,12 +15,13 @@
  *******************************************************************************/
 package restdoclet;
 
+import restdoclet.writer.simple.SimpleHtmlWriter;
+
 public class Configuration {
 
     private enum ConfigOption {
-        OUTPUT_FORMAT("o", "html"),
+        OUTPUT_FORMAT("o", SimpleHtmlWriter.OUTPUT_OPTION_NAME),
         TITLE("t", "REST Endpoint Descriptions"),
-        FILENAME("f", "./index.html"),
         STYLESHEET("stylesheet", "./stylesheet.css"),
         API_VERSION("version", null),
         URL("url", "/");
@@ -54,10 +55,6 @@ public class Configuration {
 
     public String getDocumentTitle() {
         return getOption(ConfigOption.TITLE);
-    }
-
-    public String getOutputFileName() {
-        return getOption(ConfigOption.FILENAME);
     }
 
     public String getStyleSheet() {

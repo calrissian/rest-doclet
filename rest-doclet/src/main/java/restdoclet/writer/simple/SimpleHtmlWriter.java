@@ -62,7 +62,7 @@ public class SimpleHtmlWriter implements restdoclet.writer.Writer {
         PrintWriter out = null;
 
         try {
-            out = new PrintWriter(new File(config.getOutputFileName()));
+            out = new PrintWriter(new File(".", "index.html"));
 
             out.println("<?xml version=\"1.0\" encoding=\"ISO-8859-1\" standalone=\"no\" ?>");
             out.println("<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\"");
