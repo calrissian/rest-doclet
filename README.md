@@ -120,3 +120,23 @@ Configure the javadoc plugin to use a custom doclet.  The following shows how to
   ```
   For a more complete example on using the javadoc command see [Using the javadoc command] (http://docs.oracle.com/javase/6/docs/technotes/tools/windows/javadoc.html#runningjavadoc)
 
+Try it out
+----------
+There are working examples included for Spring and JAX-RS.
+
+For interactive documentation using swagger-ui
+```shell
+cd examples/spring-example
+mvn clean install jetty:run-war
+```
+To view it open [http://localhost:8080/index.html](http://localhost:8080/index.html)
+
+For simple legacy html representation
+```shell
+cd examples/spring-example
+mvn clean site:site
+firefox target/site/restdoc/index.html
+```
+
+
+
