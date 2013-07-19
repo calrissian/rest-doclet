@@ -39,6 +39,8 @@
                     </webResources>
                 </configuration>
             </plugin>
+
+            <!--Config to attach the rest documentation to the artifact during deployment.-->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
@@ -62,7 +64,7 @@
                             <destDir>rest-api</destDir>
                             <reportOutputDirectory>${project.build.directory}</reportOutputDirectory>
                             <!--<additionalJOption>-J-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=5005</additionalJOption>-->
-                            <additionalparam>-t "REST ${project.version} Documentation" -o swagger -url "http://localhost:8080"</additionalparam>
+                            <additionalparam>-o swagger -version ${project.version} -url "http://localhost:8080"</additionalparam>
                         </configuration>
                         <goals>
                             <goal>javadoc</goal>
@@ -73,4 +75,37 @@
         </plugins>
     </build>
 
+    <!--Add config for building with site documentation which defaults to the legacy format-->
+    <reporting>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <reportSets>
+                    <reportSet>
+                        <id>restdoc</id>
+                        <configuration>
+                            <doctitle>REST ${project.version} Documentation</doctitle>
+                            <windowtitle>REST ${project.version} Documentation</windowtitle>
+                            <name>REST Endpoints</name>
+                            <description>REST ${project.version} Documentation</description>
+                            <doclet>restdoclet.RestDoclet</doclet>
+                            <docletArtifact>
+                                <groupId>rest-doclet</groupId>
+                                <artifactId>rest-doclet</artifactId>
+                                <version>${project.version}</version>
+                            </docletArtifact>
+                            <useStandardDocletOptions>false</useStandardDocletOptions>
+                            <destDir>restdoc</destDir>
+                            <!--<additionalJOption>-J-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=5005</additionalJOption>-->
+                            <additionalparam>-t "REST ${project.version} Documentation"</additionalparam>
+                        </configuration>
+                        <reports>
+                            <report>javadoc</report>
+                        </reports>
+                    </reportSet>
+                </reportSets>
+            </plugin>
+        </plugins>
+    </reporting>
 </project>
