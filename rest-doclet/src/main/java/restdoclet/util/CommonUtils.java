@@ -36,6 +36,10 @@ public class CommonUtils {
         return items == null || items.isEmpty();
     }
 
+    public static boolean isEmpty(String value) {
+        return value == null || value.isEmpty();
+    }
+
     public static void closeQuietly(Closeable closeable) {
 
         if (closeable == null)
@@ -65,6 +69,8 @@ public class CommonUtils {
     }
 
     public static String fixPath(String path) {
+        if (isEmpty(path))
+            return "/";
 
         //remove duplicates path seperators
         int len = 0;

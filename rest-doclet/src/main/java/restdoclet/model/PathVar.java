@@ -15,35 +15,36 @@
  *******************************************************************************/
 package restdoclet.model;
 
-public class QueryParamDescriptor {
+import com.sun.javadoc.Type;
+
+public class PathVar {
 
     private final String name;
-    private final boolean required;
     private final String description;
+    private final Type type;
 
-    public QueryParamDescriptor(String name, boolean required, String description) {
+    public PathVar(String name, String description, Type type) {
         this.name = name;
-        this.required = required;
         this.description = description;
+        this.type = type;
     }
 
     public String getName() {
         return name;
     }
 
-    public boolean isRequired() {
-        return required;
-    }
-
     public String getDescription() {
         return description;
     }
 
+    public Type getType() {
+        return type;
+    }
+
     @Override
     public String toString() {
-        return "QueryParamDescriptor{" +
+        return "PathVar{" +
                 "name='" + name + '\'' +
-                ", required=" + required +
                 ", description='" + description + '\'' +
                 '}';
     }

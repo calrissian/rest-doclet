@@ -15,12 +15,16 @@
  *******************************************************************************/
 package restdoclet;
 
+import restdoclet.writer.simple.SimpleHtmlWriter;
+
 public class Configuration {
 
     private enum ConfigOption {
+        OUTPUT_FORMAT("o", SimpleHtmlWriter.OUTPUT_OPTION_NAME),
         TITLE("t", "REST Endpoint Descriptions"),
-        FILENAME("f", "./index.html"),
-        STYLESHEET("stylesheet", "./stylesheet.css");
+        STYLESHEET("stylesheet", "./stylesheet.css"),
+        API_VERSION("version", null),
+        URL("url", "/");
 
         private String option;
         private String defaultValue;
@@ -45,16 +49,28 @@ public class Configuration {
         this.options = options;
     }
 
+    public String getOutputFormat() {
+        return getOption(ConfigOption.OUTPUT_FORMAT);
+    }
+
     public String getDocumentTitle() {
         return getOption(ConfigOption.TITLE);
     }
 
-    public String getOutputFileName() {
-        return getOption(ConfigOption.FILENAME);
-    }
-
     public String getStyleSheet() {
         return getOption(ConfigOption.STYLESHEET);
+    }
+
+    public String getApiVersion() {
+        return getOption(ConfigOption.API_VERSION);
+    }
+
+    public String getUrl() {
+        return getOption(ConfigOption.URL);
+    }
+
+    public boolean hasUrl() {
+        return getOption(ConfigOption.URL.getOption(), null) != null;
     }
 
     public boolean isdefaultStyleSheet() {

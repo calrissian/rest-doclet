@@ -38,6 +38,7 @@ There are some limitations to using simple annotations and javadocs.  The rest-d
  * @name [value] - Used in the class javadoc to allow for you to override the name of the grouping for the endpoints in a class.  This will default to the class name if not defined.
  * @pathVar [name] [description] - Used in the method javadocs to override the description of the path parameter with the given name.  This will default to the @param javadoc description for the variable representing that path parameter if not defined.
  * @queryParam [name] [description] - Used in the method javadocs to override the description of the query parameter with the given name.  This will default to the @param javadoc description for the variable representing that query parameter if not defined.
+ * @requestBody [description] - Used in the method javadocs to override the description of the variable which represents the request body.  This will default to the @param javadoc description for the variable representing the request body if not defined.
 
 Using the following example shows how these can be used with the previous Spring endpoint example.
 ```java
@@ -68,9 +69,11 @@ public class Example {
 Command Line Options
 --------------------
 There is additionally a few command line options to set global options.
- * -t [title] - Allows the title to be specifice for the HTML page. Default is "REST Endpoint Descriptions"
- * -f [filename] - Allows the filename to be specified for the HTML page. Default is "./index.html"
- * -stylesheet - Allows for a different stylesheet to be attached to the HTML page.
+ * -o (legacy | swagger) - Allows you to specify the output format.  Currently, the doclet will output into either a simple html page (legacy) or will generate a [swagger](https://github.com/wordnik/swagger-ui) ui based documentation.  This options defaults to the legacy documentation format if not set.
+ * -t [title] - (legacy only) Allows the title to be specifice for the HTML page. Default is "REST Endpoint Descriptions"
+ * -stylesheet - (legacy only) Allows for a different stylesheet to be attached to the HTML page.
+ * -version - (swagger only) Allows for a REST API version to be set for the documentation.
+ * -url - (swagger only) Allows for the documentation to be linked to a working version of the REST API.  If set the documentation will allow users to make calls directly from the documentation, otherwise the documentation will be read only.
 
 
 Generating the documentation
@@ -99,7 +102,7 @@ Configure the javadoc plugin to use a custom doclet.  The following shows how to
                           </docletArtifact>
                           <useStandardDocletOptions>false</useStandardDocletOptions>
                           <destDir>restdoc</destDir>
-                          <additionalparam>-t "REST ${project.version} Documentation"</additionalparam>
+                          <additionalparam>-o swagger</additionalparam>
                       </configuration>
                       <reports>
                           <report>javadoc</report>

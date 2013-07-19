@@ -19,8 +19,9 @@ package restdoclet.collector.spring;
 import com.sun.javadoc.*;
 import restdoclet.collector.AbstractCollector;
 import restdoclet.collector.EndpointMapping;
-import restdoclet.model.PathVariableDescriptor;
-import restdoclet.model.QueryParamDescriptor;
+import restdoclet.model.PathVar;
+import restdoclet.model.QueryParam;
+import restdoclet.model.RequestBody;
 
 import java.util.*;
 
@@ -29,6 +30,7 @@ import static java.util.Arrays.asList;
 import static restdoclet.util.AnnotationUtils.getAnnotationName;
 import static restdoclet.util.AnnotationUtils.getElementValue;
 import static restdoclet.util.CommonUtils.firstNonEmpty;
+import static restdoclet.util.CommonUtils.isEmpty;
 import static restdoclet.util.TagUtils.*;
 
 public class SpringCollector extends AbstractCollector {
@@ -37,6 +39,7 @@ public class SpringCollector extends AbstractCollector {
     protected static final String MAPPING_ANNOTATION = "org.springframework.web.bind.annotation.RequestMapping";
     protected static final String PATHVAR_ANNOTATION = "org.springframework.web.bind.annotation.PathVariable";
     protected static final String PARAM_ANNOTATION = "org.springframework.web.bind.annotation.RequestParam";
+    protected static final String REQUESTBODY_ANNOTATION = "org.springframework.web.bind.annotation.RequestBody";
 
     @Override
     protected boolean shouldIgnoreClass(ClassDoc classDoc) {
@@ -91,8 +94,8 @@ public class SpringCollector extends AbstractCollector {
     }
 
     @Override
-    protected Collection<PathVariableDescriptor> generatePathVars(MethodDoc methodDoc) {
-        Collection<PathVariableDescriptor> retVal = new ArrayList<PathVariableDescriptor>();
+    protected Collection<PathVar> generatePathVars(MethodDoc methodDoc) {
+        Collection<PathVar> retVal = new ArrayList<PathVar>();
 
         Tag[] tags = methodDoc.tags(PATHVAR_TAG);
         ParamTag[] paramTags = methodDoc.paramTags();
@@ -112,7 +115,7 @@ public class SpringCollector extends AbstractCollector {
                     if (text == null)
                         text = "";
 
-                    retVal.add(new PathVariableDescriptor(name, text));
+                    retVal.add(new PathVar(name, text, parameter.type()));
                 }
             }
         }
@@ -121,8 +124,8 @@ public class SpringCollector extends AbstractCollector {
     }
 
     @Override
-    protected Collection<QueryParamDescriptor> generateQueryParams(MethodDoc methodDoc) {
-        Collection<QueryParamDescriptor> retVal = new ArrayList<QueryParamDescriptor> ();
+    protected Collection<QueryParam> generateQueryParams(MethodDoc methodDoc) {
+        Collection<QueryParam> retVal = new ArrayList<QueryParam> ();
 
         Tag[] tags = methodDoc.tags(QUERYPARAM_TAG);
         ParamTag[] paramTags = methodDoc.paramTags();
@@ -149,11 +152,35 @@ public class SpringCollector extends AbstractCollector {
                     if (text == null)
                         text = "";
 
-                    retVal.add(new QueryParamDescriptor(name, required, text));
+                    retVal.add(new QueryParam(name, required, text, parameter.type()));
                 }
             }
         }
         return retVal;
+    }
+
+    @Override
+    protected RequestBody generateRequestBody(MethodDoc methodDoc) {
+
+        Tag[] tags = methodDoc.tags(REQUESTBODY_TAG);
+        ParamTag[] paramTags = methodDoc.paramTags();
+
+        for (Parameter parameter : methodDoc.parameters()) {
+            for (AnnotationDesc annotation : parameter.annotations()) {
+                if (getAnnotationName(annotation).equals(REQUESTBODY_ANNOTATION)) {
+
+                    //first check for special tag, then check regular param tag, finally default to empty string
+                    String text = (isEmpty(tags) ? null : tags[0].text());
+                    if (text == null)
+                        text = findParamText(paramTags, parameter.name());
+                    if (text == null)
+                        text = "";
+
+                    return new RequestBody(parameter.name(), text, parameter.type());
+                }
+            }
+        }
+        return null;
     }
 
     @Override

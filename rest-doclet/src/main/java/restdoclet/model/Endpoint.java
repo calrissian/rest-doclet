@@ -15,34 +15,45 @@
  *******************************************************************************/
 package restdoclet.model;
 
+import com.sun.javadoc.Type;
+
 import java.util.Collection;
 
-public class EndpointDescriptor {
+public class Endpoint {
 
     private final String path;
     private final String httpMethod;
-    private final Collection<QueryParamDescriptor> queryParams;
-    private final Collection<PathVariableDescriptor> pathVars;
+    private final Collection<QueryParam> queryParams;
+    private final Collection<PathVar> pathVars;
+    private final RequestBody requestBody;
     private final Collection<String> consumes;
     private final Collection<String> produces;
+    private final String shortDescription;
     private final String description;
+    private final Type type;
 
-    public EndpointDescriptor(
+    public Endpoint(
             String path,
             String httpMethod,
-            Collection<QueryParamDescriptor> queryParams,
-            Collection<PathVariableDescriptor> pathVars,
+            Collection<QueryParam> queryParams,
+            Collection<PathVar> pathVars,
+            RequestBody requestBody,
             Collection<String> consumes,
             Collection<String> produces,
-            String description) {
+            String shortDescription,
+            String description,
+            Type type) {
 
         this.path = path;
         this.httpMethod = httpMethod;
         this.queryParams = queryParams;
         this.pathVars = pathVars;
+        this.requestBody = requestBody;
         this.consumes = consumes;
         this.produces = produces;
+        this.shortDescription = shortDescription;
         this.description = description;
+        this.type = type;
     }
 
     public String getPath() {
@@ -53,12 +64,16 @@ public class EndpointDescriptor {
         return httpMethod;
     }
 
-    public Collection<QueryParamDescriptor> getQueryParams() {
+    public Collection<QueryParam> getQueryParams() {
         return queryParams;
     }
 
-    public Collection<PathVariableDescriptor> getPathVars() {
+    public Collection<PathVar> getPathVars() {
         return pathVars;
+    }
+
+    public RequestBody getRequestBody() {
+        return requestBody;
     }
 
     public Collection<String> getConsumes() {
@@ -69,19 +84,29 @@ public class EndpointDescriptor {
         return produces;
     }
 
+    public String getShortDescription() {
+        return shortDescription;
+    }
+
     public String getDescription() {
         return description;
     }
 
+    public Type getType() {
+        return type;
+    }
+
     @Override
     public String toString() {
-        return "EndpointDescriptor{" +
+        return "Endpoint{" +
                 "path='" + path + '\'' +
                 ", httpMethod='" + httpMethod + '\'' +
                 ", queryParams=" + queryParams +
                 ", pathVars=" + pathVars +
+                ", requestBody=" + requestBody +
                 ", consumes=" + consumes +
                 ", produces=" + produces +
+                ", shortDescription='" + shortDescription + '\'' +
                 ", description='" + description + '\'' +
                 '}';
     }

@@ -15,7 +15,10 @@
  *******************************************************************************/
 package restdoclet.util;
 
+import com.sun.javadoc.Doc;
 import com.sun.javadoc.Tag;
+
+import static restdoclet.util.CommonUtils.isEmpty;
 
 
 public class TagUtils {
@@ -25,6 +28,7 @@ public class TagUtils {
     public static final String NAME_TAG = "name";
     public static final String PATHVAR_TAG = "pathVar";
     public static final String QUERYPARAM_TAG = "queryParam";
+    public static final String REQUESTBODY_TAG = "requestBody";
 
     public static String findParamText(Tag[] tags, String name) {
         for (Tag tag : tags)
@@ -34,4 +38,14 @@ public class TagUtils {
         return null;
     }
 
+    public static String firstSentence(Doc doc) {
+        Tag[] tags = doc.firstSentenceTags();
+        StringBuilder sb = new StringBuilder();
+        if (!isEmpty(tags)) {
+            for (Tag tag : tags)
+                sb.append(tag.text());
+        }
+
+        return sb.toString();
+    }
 }
