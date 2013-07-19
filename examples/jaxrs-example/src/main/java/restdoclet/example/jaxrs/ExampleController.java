@@ -47,9 +47,9 @@ public class ExampleController {
     @POST
     @Produces(MediaType.TEXT_PLAIN)
     @Path("/add")
-    public int postExample(@QueryParam("value") int value) {
+    public String postExample(@QueryParam("value") int value) {
         count += value;
-        return count;
+        return Integer.toString(count);
     }
 
     /**
@@ -78,7 +78,7 @@ public class ExampleController {
      * @pathVar name Name of the user to store the color for
      */
     @POST
-    @Consumes(MediaType.TEXT_PLAIN)
+    @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.TEXT_PLAIN)
     @Path("/user/{name}/color")
     public String setColor(@PathParam("name") String userId, String value) {

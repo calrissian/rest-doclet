@@ -15,6 +15,7 @@
  *******************************************************************************/
 package restdoclet.example.spring;
 
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
@@ -55,11 +56,11 @@ public class ExampleController {
      * @param value Value to be added to a running total.
      * @return The current total.
      */
-    @RequestMapping(value = "/add", method = POST, produces = "text/plain")
+    @RequestMapping(value = "/add", method = POST, produces = MediaType.TEXT_PLAIN_VALUE)
     @ResponseBody
-    public int postExample(@RequestParam int value) {
+    public String postExample(@RequestParam int value) {
         count += value;
-        return count;
+        return Integer.toString(count);
     }
 
     /**
@@ -70,7 +71,7 @@ public class ExampleController {
      * @pathVar name Name of the user to retrieve the color for
      * @queryParam normalize If set to "true" the name of the color will be normalized before being returned.
      */
-    @RequestMapping(value = "/user/{name}/color", produces = "text/plain")
+    @RequestMapping(value = "/user/{name}/color", produces = MediaType.TEXT_PLAIN_VALUE)
     @ResponseBody
     public String getColor(@PathVariable("name") String userId, @RequestParam(required = false) boolean normalize) {
         if (!userColors.containsKey(userId))
@@ -87,7 +88,7 @@ public class ExampleController {
      * @pathVar name Name of the user to store the color for
      * @queryParam color The color to give to the user
      */
-    @RequestMapping(value = "/user/{name}/color", method = {POST, PUT}, consumes = "text/plain", produces = "text/plain")
+    @RequestMapping(value = "/user/{name}/color", method = {POST, PUT}, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.TEXT_PLAIN_VALUE)
     @ResponseBody
     public String setColor(@PathVariable("name") String userId, @RequestBody String value) {
         userColors.put(userId, value);
