@@ -22,11 +22,12 @@
         if (url.indexOf('#')> -1) {
             url = url.substring(0, url.lastIndexOf('#'));
         }
-        url = url.substring(0, url.length - 1);
-        url = url.substring(0, url.lastIndexOf('/'));
-        url = url + '/api-docs';
+        if (url.charAt(url.length-1) != '/') {
+            url = url.substring(0, url.length - 1);
+            url = url.substring(0, url.lastIndexOf('/')) + '/';
+        }
 	    window.swaggerUi = new SwaggerUi({
-                discoveryUrl:url,
+                discoveryUrl:url + 'api-docs',
                 dom_id:"swagger-ui-container",
                 supportHeaderParams: false,
                 supportedSubmitMethods: ['get', 'post', 'put', 'delete'],

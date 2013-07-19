@@ -18,13 +18,14 @@
 
     <script type="text/javascript">
 	$(function () {
-	    var url = window.location.href;
-	    if (url.indexOf('#')> -1) {
-		    url = url.substring(0, url.lastIndexOf('#'));
-	    }
-	    url = url.substring(0, url.length - 1);
-	    url = url.substring(0, url.lastIndexOf('/'));
-	    url = url + '/api-docs';
+        var url = window.location.href;
+        if (url.indexOf('#')> -1) {
+            url = url.substring(0, url.lastIndexOf('#'));
+        }
+            if (url.charAt(url.length-1) != '/') {
+            url = url.substring(0, url.length - 1);
+            url = url.substring(0, url.lastIndexOf('/')) + '/';
+        }
 	    window.swaggerUi = new SwaggerUi({
                 discoveryUrl:url,
                 dom_id:"swagger-ui-container",
