@@ -69,7 +69,7 @@ public class Example {
 Command Line Options
 --------------------
 There is additionally a few command line options to set global options.
- * -o <legacy | swagger> - Allows you to specify the output format.  Currently, the doclet will output into either a simple html page (legacy) or will generate a [swagger](https://github.com/wordnik/swagger-ui) ui based documentation.  This options defaults to the legacy documentation format if not set.
+ * -o (legacy | swagger) - Allows you to specify the output format.  Currently, the doclet will output into either a simple html page (legacy) or will generate a [swagger](https://github.com/wordnik/swagger-ui) ui based documentation.  This options defaults to the legacy documentation format if not set.
  * -t [title] - (legacy only) Allows the title to be specifice for the HTML page. Default is "REST Endpoint Descriptions"
  * -stylesheet - (legacy only) Allows for a different stylesheet to be attached to the HTML page.
  * -version - (swagger only) Allows for a REST API version to be set for the documentation.
