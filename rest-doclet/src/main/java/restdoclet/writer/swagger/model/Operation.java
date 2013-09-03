@@ -5,35 +5,35 @@ import java.util.Collection;
 import static restdoclet.util.CommonUtils.isEmpty;
 
 public class Operation {
-    private final String httpMethod;
+    private final String method;
     private final String nickname;
     private final String notes;
     private final String summary;
-    private final String responseClass;
+    private final String type;
     private final Collection<String> produces;
     private final Collection<String> consumes;
     private final Collection<Parameter> parameters;
 
-    public Operation(String httpMethod,
+    public Operation(String method,
                      String nickname,
                      String notes,
                      String summary,
-                     String responseClass,
+                     String type,
                      Collection<String> produces,
                      Collection<String> consumes,
                      Collection<Parameter> parameters) {
-        this.httpMethod = httpMethod;
+        this.method = method;
         this.nickname = nickname;
         this.notes = notes;
         this.summary = summary;
-        this.responseClass = responseClass;
+        this.type = type;
         this.produces = (isEmpty(produces) ? null : produces);
         this.consumes = (isEmpty(consumes) ? null : consumes);
         this.parameters = (isEmpty(parameters) ? null : parameters);
     }
 
-    public String getHttpMethod() {
-        return httpMethod;
+    public String getMethod() {
+        return method;
     }
 
     public String getNickname() {
@@ -48,8 +48,8 @@ public class Operation {
         return summary;
     }
 
-    public String getResponseClass() {
-        return responseClass;
+    public String getType() {
+        return type;
     }
 
     public Collection<String> getProduces() {

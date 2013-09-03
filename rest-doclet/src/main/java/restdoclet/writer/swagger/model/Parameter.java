@@ -1,23 +1,31 @@
 package restdoclet.writer.swagger.model;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+import java.util.Collection;
+
+import static restdoclet.util.CommonUtils.isEmpty;
+
 public class Parameter {
 
     private final String paramType;
     private final String name;
     private final String description;
-    private final String dataType;
+    private final String type;
+    private final String format;
     private final boolean required;
     private final boolean allowMultiple;
-    private final AllowableValues allowableValues;
+    @JsonProperty("enum") private final Collection<String> allowableValues;
 
-    public Parameter(String paramType, String name, String description, String dataType, boolean required, boolean allowMultiple, AllowableValues allowableValues) {
+    public Parameter(String paramType, String name, String description, String type, String format, boolean required, boolean allowMultiple, Collection<String> allowableValues) {
         this.paramType = paramType;
         this.name = name;
         this.description = description;
-        this.dataType = dataType;
+        this.type = type;
+        this.format = format;
         this.required = required;
         this.allowMultiple = allowMultiple;
-        this.allowableValues = allowableValues;
+        this.allowableValues = (isEmpty(allowableValues) ? null : allowableValues);
     }
 
     public String getParamType() {
@@ -32,8 +40,12 @@ public class Parameter {
         return description;
     }
 
-    public String getDataType() {
-        return dataType;
+    public String getType() {
+        return type;
+    }
+
+    public String getFormat() {
+        return format;
     }
 
     public boolean isRequired() {
@@ -44,7 +56,7 @@ public class Parameter {
         return allowMultiple;
     }
 
-    public AllowableValues getAllowableValues() {
+    public Collection<String> getAllowableValues() {
         return allowableValues;
     }
 }

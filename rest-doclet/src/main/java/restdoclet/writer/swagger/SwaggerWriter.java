@@ -19,7 +19,6 @@ package restdoclet.writer.swagger;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
-import com.sun.javadoc.Type;
 import restdoclet.Configuration;
 import restdoclet.model.*;
 import restdoclet.writer.Writer;
@@ -140,9 +139,10 @@ public class SwaggerWriter implements Writer {
                 pathVar.getName(),
                 pathVar.getDescription(),
                 basicType(pathVar.getType()),
+                null,
                 true,
                 false,
-                getAllowableValues(pathVar.getType())
+                allowableValues(pathVar.getType())
         );
     }
 
@@ -155,9 +155,10 @@ public class SwaggerWriter implements Writer {
                 queryParam.getName(),
                 queryParam.getDescription(),
                 (container ? internalContainerType(queryParam.getType()) : basicType(queryParam.getType())),
+                null,
                 queryParam.isRequired(),
                 container,
-                getAllowableValues(queryParam.getType())
+                allowableValues(queryParam.getType())
         );
     }
 
@@ -167,15 +168,11 @@ public class SwaggerWriter implements Writer {
                 requestBody.getName(),
                 requestBody.getDescription(),
                 dataType(requestBody.getType()),
+                null,
                 true,
                 false,
-                getAllowableValues(requestBody.getType())
+                allowableValues(requestBody.getType())
         );
-    }
-
-    private static AllowableValues getAllowableValues(Type type) {
-        Collection<String> values = allowableValues(type);
-        return isEmpty(values) ? null : new AllowableValues("List", values);
     }
 
     private static Map<String, Collection<Endpoint>> groupPaths (Collection<Endpoint> endpoints) {
