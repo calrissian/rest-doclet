@@ -21,16 +21,18 @@ import com.sun.javadoc.FieldDoc;
 import com.sun.javadoc.ParameterizedType;
 import com.sun.javadoc.Type;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.Set;
+import java.util.*;
 
 import static java.util.Collections.emptyList;
 import static restdoclet.util.CommonUtils.isEmpty;
 
 class TypeUtils {
 
+    /**
+     * Will return a full data type for Swagger.
+     * @param type
+     * @return
+     */
     public static String dataType(Type type) {
         if (type == null)
             return null;
@@ -47,6 +49,11 @@ class TypeUtils {
         return basicType(type);
     }
 
+    /**
+     * Checks if the type is an iterable or an array
+     * @param type
+     * @return
+     */
     public static boolean isContainer(Type type) {
 
         //first check for arrays
@@ -60,6 +67,11 @@ class TypeUtils {
         return false;
     }
 
+    /**
+     * This will grab the internal type from an array or a parameterized container.
+     * @param type
+     * @return
+     */
     public static String internalContainerType(Type type) {
         //treat arrays first
         if (type.dimension() != null && !type.dimension().isEmpty())
@@ -76,6 +88,11 @@ class TypeUtils {
         return "Object";
     }
 
+    /**
+     * Returns the basic type.  If not one of the supported swagger basic types then it is treated as an Object.
+     * @param type
+     * @return
+     */
     public static String basicType(Type type) {
         if (type == null)
             return "void";
@@ -119,6 +136,11 @@ class TypeUtils {
         return "Object";
     }
 
+    /**
+     * This will retrieve all known allowable values from an enum.
+     * @param type
+     * @return
+     */
     public static Collection<String> allowableValues(Type type) {
         if (type == null || type.asClassDoc() == null)
             return emptyList();
@@ -134,6 +156,13 @@ class TypeUtils {
         return values;
     }
 
+    /**
+     * Checks the class doc to see if it is a type or subtype of the provided class or object.
+     * @param classDoc
+     * @param targetClazz
+     * @param <T>
+     * @return
+     */
     private static <T> boolean isType(ClassDoc classDoc, Class<T> targetClazz) {
         if (classDoc == null)
             return false;
@@ -147,7 +176,6 @@ class TypeUtils {
         for (ClassDoc iface : classDoc.interfaces())
             if (isType(iface, targetClazz))
                 return true;
-
 
         return false;
     }

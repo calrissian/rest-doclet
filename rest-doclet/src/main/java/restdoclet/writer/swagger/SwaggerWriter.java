@@ -16,15 +16,14 @@
 package restdoclet.writer.swagger;
 
 
-import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import com.sun.javadoc.Type;
 import restdoclet.Configuration;
-import restdoclet.model.ClassDescriptor;
-import restdoclet.model.Endpoint;
-import restdoclet.model.PathVar;
-import restdoclet.model.QueryParam;
+import restdoclet.model.*;
 import restdoclet.writer.Writer;
+import restdoclet.writer.swagger.model.*;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -47,7 +46,9 @@ public class SwaggerWriter implements Writer {
     private static final String SWAGGER_VERSION = "1.2";
     private static final String RESOURCE_DOC = "./api-docs";
     private static final String API_DOC_DIR = "apis";
-    private static ObjectMapper mapper = new ObjectMapper();
+    private static ObjectMapper mapper = new ObjectMapper()
+            .configure(SerializationFeature.WRITE_NULL_MAP_VALUES, false)
+            .setSerializationInclusion(JsonInclude.Include.NON_NULL);
 
     @Override
     public void write(Collection<ClassDescriptor> classDescriptors, Configuration config) throws IOException {
@@ -69,6 +70,150 @@ public class SwaggerWriter implements Writer {
         writeResource(resources, config);
         copyIndex(config);
         copySwagger();
+    }
+
+
+
+    private static void writeResource(Map<String, Collection<Endpoint>> resources, Configuration config) throws IOException {
+
+        ResourceListing resourceListing = new ResourceListing(SWAGGER_VERSION, config.getApiVersion(), config.getDocumentTitle());
+        for (Entry<String, Collection<Endpoint>> entry : resources.entrySet()) {
+            resourceListing.addApi("/../" + API_DOC_DIR + entry.getKey(), "");
+            writeApi(entry.getKey(), entry.getValue(), config);
+        }
+
+        mapper.writerWithDefaultPrettyPrinter().writeValue(new FileOutputStream(RESOURCE_DOC), resourceListing);
+
+    }
+
+    private static void writeApi(String resource, Collection<Endpoint> endpoints, Configuration config) throws IOException {
+        Map<String, Collection<Endpoint>> pathGroups = groupPaths(endpoints);
+
+        File apiFile = new File("./" + API_DOC_DIR , resource);
+        apiFile.getParentFile().mkdirs();
+
+        Collection<Api> apis = new ArrayList<Api>(pathGroups.size());
+        for (Entry<String, Collection<Endpoint>> entry : pathGroups.entrySet())
+            apis.add(new Api(entry.getKey(), "", getOperations(entry.getValue())));
+
+
+        mapper.writerWithDefaultPrettyPrinter().writeValue(new FileOutputStream(apiFile),
+                new ApiListing(SWAGGER_VERSION, config.getUrl(), resource, config.getApiVersion(), apis)
+        );
+    }
+
+    private static Collection<Operation> getOperations(Collection<Endpoint> endpoints) {
+        Collection<Operation> operations = new ArrayList<Operation>(endpoints.size());
+
+        for (Endpoint endpoint : endpoints) {
+            Collection<Parameter> params = new ArrayList<Parameter>();
+
+            for (PathVar pathVar : endpoint.getPathVars())
+                params.add(getParameter(pathVar));
+
+            for (QueryParam queryParam : endpoint.getQueryParams())
+                params.add(getParameter(queryParam));
+
+            if (endpoint.getRequestBody() != null)
+                params.add(getParameter(endpoint.getRequestBody()));
+
+            operations.add(
+                    new Operation(
+                            endpoint.getHttpMethod(),
+                            "nickname",
+                            endpoint.getShortDescription(),
+                            endpoint.getDescription(),
+                            dataType(endpoint.getType()),
+                            endpoint.getProduces(),
+                            endpoint.getConsumes(),
+                            params
+                    )
+            );
+        }
+
+        return operations;
+    }
+
+    private static Parameter getParameter(PathVar pathVar) {
+        return new Parameter(
+                "path",
+                pathVar.getName(),
+                pathVar.getDescription(),
+                basicType(pathVar.getType()),
+                true,
+                false,
+                getAllowableValues(pathVar.getType())
+        );
+    }
+
+    private static Parameter getParameter(QueryParam queryParam) {
+        //If it is a container type then allow multiple but use the underlying type.
+        boolean container = isContainer(queryParam.getType());
+
+        return new Parameter(
+                "query",
+                queryParam.getName(),
+                queryParam.getDescription(),
+                (container ? internalContainerType(queryParam.getType()) : basicType(queryParam.getType())),
+                queryParam.isRequired(),
+                container,
+                getAllowableValues(queryParam.getType())
+        );
+    }
+
+    private static Parameter getParameter(RequestBody requestBody) {
+        return new Parameter(
+                "body",
+                requestBody.getName(),
+                requestBody.getDescription(),
+                dataType(requestBody.getType()),
+                true,
+                false,
+                getAllowableValues(requestBody.getType())
+        );
+    }
+
+    private static AllowableValues getAllowableValues(Type type) {
+        Collection<String> values = allowableValues(type);
+        return isEmpty(values) ? null : new AllowableValues("List", values);
+    }
+
+    private static Map<String, Collection<Endpoint>> groupPaths (Collection<Endpoint> endpoints) {
+        Map<String, Collection<Endpoint>> paths = new LinkedHashMap<String, Collection<Endpoint>>();
+        for (Endpoint endpoint : endpoints) {
+            if (paths.containsKey(endpoint.getPath())) {
+                paths.get(endpoint.getPath()).add(endpoint);
+            } else {
+                Collection<Endpoint> tmp = new ArrayList<Endpoint>();
+                tmp.add(endpoint);
+                paths.put(endpoint.getPath(), tmp);
+            }
+        }
+
+        return paths;
+    }
+
+    /**
+     * Will get the first path segment that follows the context path.  Will return the partial path as the resource id.
+     */
+    private static String getResource(String contextPath, Endpoint endpoint) {
+        if (endpoint == null || isEmpty(endpoint.getPath()))
+            return "/";
+
+        //Shouldn't need to do this, but being safe.
+        String tmp = fixPath(endpoint.getPath());
+
+        //First normalize the path then, if not part of the path then simply ignore it.
+        contextPath = fixPath(contextPath);
+        contextPath = (!tmp.startsWith(contextPath) ? "" : contextPath);
+
+        //remove the context path for evaluation
+        tmp = tmp.substring(contextPath.length());
+
+        if (tmp.indexOf("/", 1) > 0)
+            tmp = tmp.substring(0, tmp.indexOf("/", 1));
+
+        return contextPath + tmp;
     }
 
     private static void copyIndex(Configuration config) throws IOException {
@@ -108,202 +253,5 @@ public class SwaggerWriter implements Writer {
         } finally {
             close(swaggerZip, out);
         }
-
-    }
-
-    private static void writeResource(Map<String, Collection<Endpoint>> resources, Configuration config) throws IOException {
-
-        JsonGenerator gen = null;
-
-        try {
-            gen = mapper.getFactory().createGenerator(new FileOutputStream(RESOURCE_DOC)).useDefaultPrettyPrinter();
-            gen.writeStartObject();
-            gen.writeStringField("swaggerVersion", SWAGGER_VERSION);
-            if (config.getApiVersion() != null)
-                gen.writeStringField("apiVersion", config.getApiVersion());
-
-            gen.writeArrayFieldStart("apis");
-            for (Entry<String, Collection<Endpoint>> entry : resources.entrySet()) {
-                gen.writeStartObject();
-                gen.writeStringField("path", "/../" + API_DOC_DIR + entry.getKey());
-                gen.writeStringField("description", "");
-                gen.writeEndObject();
-
-                writeApi(entry.getKey(), entry.getValue(), config);
-            }
-            gen.writeEndArray();
-            gen.writeObjectFieldStart("info");
-            gen.writeStringField("title", config.getDocumentTitle());
-            gen.writeEndObject();
-            gen.writeEndObject();
-
-
-        } finally {
-            close(gen);
-        }
-    }
-
-    private static void writeApi(String resource, Collection<Endpoint> endpoints, Configuration config) throws IOException {
-        JsonGenerator gen = null;
-        Map<String, Collection<Endpoint>> pathGroups = groupPaths(endpoints);
-
-        try {
-            File apiFile = new File("./" + API_DOC_DIR , resource);
-            apiFile.getParentFile().mkdirs();
-            gen = mapper.getFactory().createGenerator(new FileOutputStream(apiFile)).useDefaultPrettyPrinter();
-            gen.writeStartObject();
-            gen.writeStringField("swaggerVersion", SWAGGER_VERSION);
-            gen.writeStringField("basePath", config.getUrl());
-            gen.writeStringField("resourcePath", resource);
-            if (config.getApiVersion() != null)
-                gen.writeStringField("apiVersion", config.getApiVersion());
-
-            gen.writeArrayFieldStart("apis");
-            for (Entry<String, Collection<Endpoint>> entry : pathGroups.entrySet()) {
-                gen.writeStartObject();
-                gen.writeStringField("path", entry.getKey());
-                gen.writeStringField("description", "");
-                gen.writeArrayFieldStart("operations");
-                for (Endpoint endpoint : entry.getValue()) {
-                    writeEndpoint(endpoint, gen);
-                }
-                gen.writeEndArray();
-                gen.writeEndObject();
-            }
-            gen.writeEndArray();
-            gen.writeEndObject();
-
-
-        } finally {
-            close(gen);
-        }
-    }
-
-    private static void writeEndpoint(Endpoint endpoint, JsonGenerator gen) throws IOException {
-        String returnType = dataType(endpoint.getType());
-
-        gen.writeStartObject();
-        gen.writeStringField("httpMethod", endpoint.getHttpMethod());
-        gen.writeStringField("nickname", "nickname");
-        gen.writeStringField("notes", endpoint.getShortDescription());
-        gen.writeStringField("summary", endpoint.getDescription());
-        if (returnType != null)
-            gen.writeStringField("responseClass", returnType);
-
-        if (!isEmpty(endpoint.getProduces())) {
-            gen.writeArrayFieldStart("produces");
-            for (String produces : endpoint.getProduces())
-                gen.writeString(produces);
-
-            gen.writeEndArray();
-        }
-        if (!isEmpty(endpoint.getConsumes())) {
-            gen.writeArrayFieldStart("consumes");
-            for (String consumes : endpoint.getConsumes()) {
-                gen.writeString(consumes);
-            }
-            gen.writeEndArray();
-        }
-
-        gen.writeArrayFieldStart("parameters");
-        for (PathVar pathVar : endpoint.getPathVars()) {
-            gen.writeStartObject();
-            gen.writeStringField("paramType", "path");
-            gen.writeStringField("name", pathVar.getName());
-            gen.writeStringField("description", pathVar.getDescription());
-            gen.writeStringField("dataType", basicType(pathVar.getType()));
-            gen.writeBooleanField("required", true);
-            gen.writeBooleanField("allowMultiple", false);
-
-            writeAllowableValues(pathVar.getType(), gen);
-
-            gen.writeEndObject();
-        }
-        for (QueryParam queryParam : endpoint.getQueryParams()) {
-            //If it is a container type then allow multiple but use the underlying type.
-            boolean container = isContainer(queryParam.getType());
-            String type = (container ? internalContainerType(queryParam.getType()) : basicType(queryParam.getType()));
-
-            gen.writeStartObject();
-            gen.writeStringField("paramType", "query");
-            gen.writeStringField("name", queryParam.getName());
-            gen.writeStringField("description", queryParam.getDescription());
-            gen.writeStringField("dataType", type);
-            gen.writeBooleanField("required", queryParam.isRequired());
-            gen.writeBooleanField("allowMultiple", container);
-
-            writeAllowableValues(queryParam.getType(), gen);
-
-            gen.writeEndObject();
-        }
-        if (endpoint.getRequestBody() != null) {
-            gen.writeStartObject();
-            gen.writeStringField("paramType", "body");
-            gen.writeStringField("name", endpoint.getRequestBody().getName());
-            gen.writeStringField("description", endpoint.getRequestBody().getDescription());
-            gen.writeStringField("dataType", dataType(endpoint.getRequestBody().getType()));
-            gen.writeBooleanField("required", true);
-            gen.writeBooleanField("allowMultiple", false);
-
-            writeAllowableValues(endpoint.getRequestBody().getType(), gen);
-
-            gen.writeEndObject();
-        }
-        gen.writeEndArray();
-        gen.writeEndObject();
-    }
-
-    private static void writeAllowableValues(Type type, JsonGenerator gen) throws IOException {
-
-        Collection<String> values = allowableValues(type);
-        if (!isEmpty(values)) {
-            gen.writeObjectFieldStart("allowableValues");
-            gen.writeStringField("valueType", "List");
-            gen.writeArrayFieldStart("values");
-            for (String field : values) {
-                gen.writeString(field);
-            }
-            gen.writeEndArray();
-            gen.writeEndObject();
-        }
-    }
-
-    private static Map<String, Collection<Endpoint>> groupPaths (Collection<Endpoint> endpoints) {
-        Map<String, Collection<Endpoint>> paths = new LinkedHashMap<String, Collection<Endpoint>>();
-        for (Endpoint endpoint : endpoints) {
-            if (paths.containsKey(endpoint.getPath())) {
-                paths.get(endpoint.getPath()).add(endpoint);
-            } else {
-                Collection<Endpoint> tmp = new ArrayList<Endpoint>();
-                tmp.add(endpoint);
-                paths.put(endpoint.getPath(), tmp);
-            }
-        }
-
-        return paths;
-    }
-
-    /**
-     * Will get the first path segment that follows the context path.  Will return the partial path as the resource id.
-     */
-    private static String getResource(String contextPath, Endpoint endpoint) {
-        if (endpoint == null || isEmpty(endpoint.getPath()))
-            return "/";
-
-        //Shouldn't need to do this, but being safe.
-        String tmp = fixPath(endpoint.getPath());
-
-
-        //First normalize the path then, if not part of the path then simply ignore it.
-        contextPath = fixPath(contextPath);
-        contextPath = (!tmp.startsWith(contextPath) ? "" : contextPath);
-
-        //remove the context path for evaluation
-        tmp = tmp.substring(contextPath.length());
-
-        if (tmp.indexOf("/", 1) > 0)
-            tmp = tmp.substring(0, tmp.indexOf("/", 1));
-
-        return contextPath + tmp;
     }
 }
