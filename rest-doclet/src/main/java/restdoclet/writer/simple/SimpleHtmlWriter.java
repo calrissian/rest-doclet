@@ -182,8 +182,6 @@ public class SimpleHtmlWriter implements restdoclet.writer.Writer {
             out.println("</body>");
             out.println("</html>");
 
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
         } finally {
             close(out);
         }
