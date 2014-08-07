@@ -1,5 +1,5 @@
-rest-doclet
-===========
+Spring & JAX-RS Rest Doclet
+===========================
 
 This java doclet allows for auto generation of REST documentation from Spring and JAX-RS annotated classes.
 
