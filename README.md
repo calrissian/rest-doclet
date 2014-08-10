@@ -94,9 +94,9 @@ Configure the javadoc plugin to use a custom doclet.  The following shows how to
                           <windowtitle>REST ${project.version} Documentation</windowtitle>
                           <name>REST Endpoints</name>
                           <description>REST ${project.version} Documentation</description>
-                          <doclet>restdoclet.RestDoclet</doclet>
+                          <doclet>org.calrissian.restdoclet.RestDoclet</doclet>
                           <docletArtifact>
-                              <groupId>rest-doclet</groupId>
+                              <groupId>org.calrissian</groupId>
                               <artifactId>rest-doclet</artifactId>
                               <version>0.1-SNAPSHOT</version>
                           </docletArtifact>
@@ -116,7 +116,7 @@ Configure the javadoc plugin to use a custom doclet.  The following shows how to
   ```
 2.  Using the javadoc command
   ```
-  > javadoc -doclet restdoclet.RestDoclet –docletpath rest-doclet.jar -t "My Rest Endpoints" endpoint.package.name
+  > javadoc -doclet org.calrissian.RestDoclet –docletpath rest-doclet.jar -t "My Rest Endpoints" endpoint.package.name
   ```
   For a more complete example on using the javadoc command see [Using the javadoc command] (http://docs.oracle.com/javase/6/docs/technotes/tools/windows/javadoc.html#runningjavadoc)
 
