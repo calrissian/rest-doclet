@@ -74,7 +74,7 @@ limitations under the License.
               <destDir>rest-api</destDir>
               <reportOutputDirectory>${project.build.directory}</reportOutputDirectory>
               <!--<additionalJOption>-J-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=5005</additionalJOption>-->
-              <additionalparam>-o swagger -version ${project.version} -url "http://localhost:8080"</additionalparam>
+              <additionalparam>-o swagger -version ${project.version} -path "/" -callable true</additionalparam>
             </configuration>
           </execution>
         </executions>
@@ -107,7 +107,7 @@ limitations under the License.
               <useStandardDocletOptions>false</useStandardDocletOptions>
               <destDir>restdoc</destDir>
               <!--<additionalJOption>-J-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=5005</additionalJOption>-->
-              <additionalparam>-t "REST ${project.version} Documentation"</additionalparam>
+              <additionalparam>-o legacy -t "REST ${project.version} Documentation"</additionalparam>
             </configuration>
           </reportSet>
         </reportSets>

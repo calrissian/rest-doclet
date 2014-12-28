@@ -97,7 +97,7 @@ public class SwaggerWriter implements Writer {
 
 
         mapper.writerWithDefaultPrettyPrinter().writeValue(new FileOutputStream(apiFile),
-                new ApiListing(SWAGGER_VERSION, config.getUrl(), resource, config.getApiVersion(), apis)
+                new ApiListing(SWAGGER_VERSION, config.getPath(), resource, config.getApiVersion(), apis)
         );
     }
 
@@ -218,7 +218,7 @@ public class SwaggerWriter implements Writer {
         OutputStream out = null;
         try {
 
-            if (config.hasUrl())
+            if (config.isCallable())
                 in = Thread.currentThread().getContextClassLoader().getResourceAsStream(SWAGGER_CALLABLE_HTML);
             else
                 in = Thread.currentThread().getContextClassLoader().getResourceAsStream(SWAGGER_DEFAULT_HTML);

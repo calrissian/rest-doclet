@@ -73,8 +73,9 @@ There is additionally a few command line options to set global options.
  * -t [title] - (legacy only) Allows the title to be specifice for the HTML page. Default is "REST Endpoint Descriptions"
  * -stylesheet - (legacy only) Allows for a different stylesheet to be attached to the HTML page.
  * -version - (swagger only) Allows for a REST API version to be set for the documentation.
- * -url - (swagger only) Allows for the documentation to be linked to a working version of the REST API.  If set the documentation will allow users to make calls directly from the documentation, otherwise the documentation will be read only.
-
+ * -callable (true | false) - (swagger only) Allows for the documentation to make get, post, put, and delete calls to a working version of the REST API. If set the documentation will allow users to make calls directly from the documentation, otherwise the documentation will be read only. This option defaults to true if not set.
+ * -path - (swagger only) When using callable is not set to 'false', this is used to determine the relative path of working REST API.  Default is "/"
+ 
 
 Generating the documentation
 ----------------------------

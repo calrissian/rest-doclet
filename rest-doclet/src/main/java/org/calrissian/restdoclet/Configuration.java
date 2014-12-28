@@ -17,14 +17,21 @@ package org.calrissian.restdoclet;
 
 import org.calrissian.restdoclet.writer.simple.SimpleHtmlWriter;
 
+import static java.lang.Boolean.parseBoolean;
+
 public class Configuration {
 
     private enum ConfigOption {
         OUTPUT_FORMAT("o", SimpleHtmlWriter.OUTPUT_OPTION_NAME),
+
+        //Legacy Options
         TITLE("t", "REST Endpoint Descriptions"),
         STYLESHEET("stylesheet", "./stylesheet.css"),
+
+        //Swagger options
         API_VERSION("version", null),
-        URL("url", "/");
+        DISPLAY_ONLY("callable", "true"),
+        BASEPATH("path", "/");
 
         private String option;
         private String defaultValue;
@@ -65,12 +72,12 @@ public class Configuration {
         return getOption(ConfigOption.API_VERSION);
     }
 
-    public String getUrl() {
-        return getOption(ConfigOption.URL);
+    public String getPath() {
+        return getOption(ConfigOption.BASEPATH);
     }
 
-    public boolean hasUrl() {
-        return getOption(ConfigOption.URL.getOption(), null) != null;
+    public boolean isCallable() {
+        return parseBoolean(getOption(ConfigOption.DISPLAY_ONLY));
     }
 
     public boolean isdefaultStyleSheet() {
