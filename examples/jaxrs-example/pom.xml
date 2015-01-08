@@ -23,6 +23,7 @@ limitations under the License.
   </parent>
   <artifactId>rest-doclet-jaxrs-example</artifactId>
   <packaging>war</packaging>
+  <name>Rest Doclet JAX-RS Example</name>
   <description>Example JAX-RS project used to generate documentation.</description>
   <properties>
     <jersey.version>1.18.1</jersey.version>

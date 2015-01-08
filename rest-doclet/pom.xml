@@ -23,6 +23,7 @@ limitations under the License.
   </parent>
   <artifactId>rest-doclet</artifactId>
   <packaging>jar</packaging>
+  <name>Rest Doclet</name>
   <description>A Javadoc Doclet that generates documentation on REST annotations in a project.</description>
   <dependencies>
     <dependency>

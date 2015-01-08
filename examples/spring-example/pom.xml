@@ -23,6 +23,7 @@ limitations under the License.
   </parent>
   <artifactId>rest-doclet-spring-example</artifactId>
   <packaging>war</packaging>
+  <name>Rest Doclet Spring Example</name>
   <description>Example Spring project used to generate documentation.</description>
   <properties>
     <spring.version>3.2.8.RELEASE</spring.version>

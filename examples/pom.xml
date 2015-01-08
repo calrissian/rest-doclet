@@ -23,6 +23,7 @@ limitations under the License.
   </parent>
   <artifactId>rest-doclet-examples</artifactId>
   <packaging>pom</packaging>
+  <name>Rest Doclet Examples Parent</name>
   <description>Example projects using the rest doclet.</description>
   <modules>
     <module>jaxrs-example</module>
