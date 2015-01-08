@@ -18,7 +18,7 @@ limitations under the License.
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.calrissian.restdoclet</groupId>
   <artifactId>rest-doclet-parent</artifactId>
-  <version>1.0.0</version>
+  <version>1.0.1-SNAPSHOT</version>
   <packaging>pom</packaging>
   <name>Rest Doclet Parent</name>
   <description>A Javadoc Doclet that generates documentation on REST annotations in a project.</description>
@@ -150,7 +150,7 @@ limitations under the License.
   <scm>
     <connection>scm:git:git@github.com:calrissian/rest-doclet.git</connection>
     <developerConnection>scm:git:git@github.com:calrissian/rest-doclet.git</developerConnection>
-    <tag>1.0.0-rc2</tag>
+    <tag>HEAD</tag>
     <url>git@github.com:calrissian/rest-doclet.git</url>
   </scm>
   <distributionManagement>

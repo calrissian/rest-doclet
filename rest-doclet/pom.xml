@@ -19,7 +19,7 @@ limitations under the License.
   <parent>
     <groupId>org.calrissian.restdoclet</groupId>
     <artifactId>rest-doclet-parent</artifactId>
-    <version>1.0.0</version>
+    <version>1.0.1-SNAPSHOT</version>
   </parent>
   <artifactId>rest-doclet</artifactId>
   <packaging>jar</packaging>
