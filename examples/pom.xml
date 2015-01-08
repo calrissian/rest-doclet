@@ -19,9 +19,9 @@ limitations under the License.
   <parent>
     <groupId>org.calrissian</groupId>
     <artifactId>rest-doclet-parent</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>1.0.0-SNAPSHOT</version>
   </parent>
-  <artifactId>examples</artifactId>
+  <artifactId>rest-doclet-examples</artifactId>
   <packaging>pom</packaging>
   <description>Example projects using the rest doclet.</description>
   <modules>

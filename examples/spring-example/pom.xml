@@ -18,10 +18,10 @@ limitations under the License.
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <groupId>org.calrissian</groupId>
-    <artifactId>examples</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <artifactId>rest-doclet-examples</artifactId>
+    <version>1.0.0-SNAPSHOT</version>
   </parent>
-  <artifactId>spring-example</artifactId>
+  <artifactId>rest-doclet-spring-example</artifactId>
   <packaging>war</packaging>
   <description>Example Spring project used to generate documentation.</description>
   <properties>
