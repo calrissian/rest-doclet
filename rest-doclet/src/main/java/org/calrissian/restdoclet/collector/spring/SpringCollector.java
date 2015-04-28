@@ -35,7 +35,8 @@ import static org.calrissian.restdoclet.util.TagUtils.*;
 
 public class SpringCollector extends AbstractCollector {
 
-    protected static final String CONTROLLER_ANNOTATION = "org.springframework.stereotype.Controller";
+    protected static final String CONTROLLER_ANNOTATION = Arrays.asList("org.springframework.stereotype.Controller",
+                                                                        "org.springframework.stereotype.RestController");
     protected static final String MAPPING_ANNOTATION = "org.springframework.web.bind.annotation.RequestMapping";
     protected static final String PATHVAR_ANNOTATION = "org.springframework.web.bind.annotation.PathVariable";
     protected static final String PARAM_ANNOTATION = "org.springframework.web.bind.annotation.RequestParam";
@@ -45,7 +46,7 @@ public class SpringCollector extends AbstractCollector {
     protected boolean shouldIgnoreClass(ClassDoc classDoc) {
         //If found a controller annotation then don't ignore this class.
         for (AnnotationDesc classAnnotation : classDoc.annotations())
-            if (CONTROLLER_ANNOTATION.equals(getAnnotationName(classAnnotation)))
+            if (CONTROLLER_ANNOTATION.contains(getAnnotationName(classAnnotation)))
                 return false;
 
         //If not found then ignore this class.
@@ -144,6 +145,12 @@ public class SpringCollector extends AbstractCollector {
                     boolean required = TRUE;
                     if(!requiredVals.isEmpty())
                         required = Boolean.parseBoolean(requiredVals.get(0));
+
+                    //With spring, if defaultValue is provided then "required" is set to false automatically
+                    List<String> defaultVals = getElementValue(annotation, "defaultValue");
+
+                    if (!defaultVals.isEmpty()) 
+                        required = FALSE;
 
                     //first check for special tag, then check regular param tag, finally default to empty string
                     String text = findParamText(tags, name);
