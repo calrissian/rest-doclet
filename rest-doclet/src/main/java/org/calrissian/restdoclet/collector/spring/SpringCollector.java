@@ -36,7 +36,7 @@ import static org.calrissian.restdoclet.util.TagUtils.*;
 public class SpringCollector extends AbstractCollector {
 
     protected static final String CONTROLLER_ANNOTATION = Arrays.asList("org.springframework.stereotype.Controller",
-                                                                        "org.springframework.stereotype.RestController");
+                                                                        "org.springframework.web.bind.annotation.RestController");
     protected static final String MAPPING_ANNOTATION = "org.springframework.web.bind.annotation.RequestMapping";
     protected static final String PATHVAR_ANNOTATION = "org.springframework.web.bind.annotation.PathVariable";
     protected static final String PARAM_ANNOTATION = "org.springframework.web.bind.annotation.RequestParam";
