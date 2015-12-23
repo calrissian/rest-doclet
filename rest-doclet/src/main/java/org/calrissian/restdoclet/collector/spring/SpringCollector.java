@@ -17,6 +17,7 @@ package org.calrissian.restdoclet.collector.spring;
 
 
 import com.sun.javadoc.*;
+
 import org.calrissian.restdoclet.collector.AbstractCollector;
 import org.calrissian.restdoclet.collector.EndpointMapping;
 import org.calrissian.restdoclet.model.PathVar;
@@ -35,7 +36,7 @@ import static org.calrissian.restdoclet.util.TagUtils.*;
 
 public class SpringCollector extends AbstractCollector {
 
-    protected static final String CONTROLLER_ANNOTATION = Arrays.asList("org.springframework.stereotype.Controller",
+    protected static final List<String> CONTROLLER_ANNOTATION = Arrays.asList("org.springframework.stereotype.Controller",
                                                                         "org.springframework.web.bind.annotation.RestController");
     protected static final String MAPPING_ANNOTATION = "org.springframework.web.bind.annotation.RequestMapping";
     protected static final String PATHVAR_ANNOTATION = "org.springframework.web.bind.annotation.PathVariable";
@@ -150,7 +151,7 @@ public class SpringCollector extends AbstractCollector {
                     List<String> defaultVals = getElementValue(annotation, "defaultValue");
 
                     if (!defaultVals.isEmpty()) 
-                        required = FALSE;
+                        required = Boolean.FALSE;
 
                     //first check for special tag, then check regular param tag, finally default to empty string
                     String text = findParamText(tags, name);
